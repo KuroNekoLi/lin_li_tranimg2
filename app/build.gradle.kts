@@ -51,6 +51,8 @@ android {
 
 dependencies {
     val kotlinVersion = "ktx:2.6.2"
+    // DataStore
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
     // ViewModel
     implementation ("androidx.lifecycle:lifecycle-viewmodel-$kotlinVersion") // Use the latest version
     // LiveData
@@ -59,11 +61,10 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-runtime-$kotlinVersion") // Use the latest version
     // Compose ViewModel
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2") // Use the latest version
-
+    //backend2
     implementation("com.cmoney.backend2:backend2:5.58.0")
     implementation("com.cmoney.logdatarecorder:logdatarecorder-data:5.5.0")
     implementation("com.cmoney.logdatarecorder:logdatarecorder-domain:5.5.0")
-
     // If you're using navigation-compose, you might need to add this as well
     implementation ("androidx.navigation:navigation-compose:2.5.3") // Use the latest version
     implementation("androidx.core:core-ktx:1.9.0")

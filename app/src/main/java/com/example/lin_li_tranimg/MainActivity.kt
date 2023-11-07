@@ -23,16 +23,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.lin_li_tranimg.ui.theme.Lin_li_tranimgTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.lin_li_tranimg.ui.theme.Lin_li_tranimgTheme
 import com.example.lin_li_tranimg.util.EmailVisualTransformation
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -51,9 +53,11 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyPage(modifier: Modifier = Modifier, viewModel: LoginViewModel = viewModel()) {
+fun MyPage(modifier: Modifier = Modifier, viewModel: LoginViewModel = viewModel(factory = LoginViewModelFactory(LocalContext.current))) {
     val account by viewModel.accountState.collectAsState()
     val password by viewModel.passwordState.collectAsState()
+    // 這裡收集stateFlow為compose的state
+    val isPasswordVisible by viewModel.isAccountVisible.collectAsState()
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -90,14 +94,14 @@ fun MyPage(modifier: Modifier = Modifier, viewModel: LoginViewModel = viewModel(
                     IconButton(onClick = { viewModel.onTogglePasswordVisibility() }) {
                         Icon(
                             painter = painterResource(
-                                id = if (viewModel.isPasswordVisible) R.drawable.icon_open_eye else R.drawable.icon_close_eye
+                                id = if (isPasswordVisible) R.drawable.icon_open_eye else R.drawable.icon_close_eye
                             ),
-                            contentDescription = if (viewModel.isPasswordVisible) "隱藏帳號" else "顯示帳號",
+                            contentDescription = if (isPasswordVisible) "隱藏帳號" else "顯示帳號",
                             Modifier.size(24.dp,24.dp)
                         )
                     }
                 },
-                visualTransformation = if (viewModel.isPasswordVisible) VisualTransformation.None else EmailVisualTransformation(),
+                visualTransformation = if (isPasswordVisible) VisualTransformation.None else EmailVisualTransformation(),
 
                 modifier = Modifier
                     .fillMaxWidth()
