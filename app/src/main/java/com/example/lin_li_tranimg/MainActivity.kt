@@ -26,10 +26,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.lin_li_tranimg.ui.theme.ButtonStyles
 import com.example.lin_li_tranimg.ui.theme.Lin_li_tranimgTheme
 import com.example.lin_li_tranimg.util.EmailVisualTransformation
 
@@ -37,6 +39,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             Lin_li_tranimgTheme {
                 // A surface container using the 'background' color from the theme
@@ -51,13 +54,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyPage(modifier: Modifier = Modifier, viewModel: LoginViewModel = viewModel(factory = LoginViewModelFactory(LocalContext.current))) {
-    val account by viewModel.accountState.collectAsState()
-    val password by viewModel.passwordState.collectAsState()
-    // 這裡收集stateFlow為compose的state
-    val isPasswordVisible by viewModel.isAccountVisible.collectAsState()
+
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -76,79 +75,111 @@ fun MyPage(modifier: Modifier = Modifier, viewModel: LoginViewModel = viewModel(
                 .align(Alignment.Center)
                 .padding(top = 150.dp)
         ) {
-
-            OutlinedTextField(
-                value = account,
-                onValueChange = viewModel::onTextAccountChange,
-                label = { Text("CMoney帳號 (手機號碼或email)") },
-                leadingIcon = {
-                    // 添加在最左邊的圖示
-                    Icon(
-                        painter = painterResource(id = R.drawable.icon_login_person),
-                        contentDescription = "帳號圖示",
-                        Modifier.size(24.dp, 24.dp)
-                    )
-                },
-                trailingIcon = {
-                    // 眼睛圖示，可以通過點擊來切換顯示/隱藏帳號
-                    IconButton(onClick = { viewModel.onTogglePasswordVisibility() }) {
-                        Icon(
-                            painter = painterResource(
-                                id = if (isPasswordVisible) R.drawable.icon_open_eye else R.drawable.icon_close_eye
-                            ),
-                            contentDescription = if (isPasswordVisible) "隱藏帳號" else "顯示帳號",
-                            Modifier.size(24.dp,24.dp)
-                        )
-                    }
-                },
-                visualTransformation = if (isPasswordVisible) VisualTransformation.None else EmailVisualTransformation(),
-
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp, 0.dp)
-                    .background(Color.White)
-            )
-            OutlinedTextField(
-                value = password,
-                onValueChange = viewModel::onTextPasswordChange,
-                label = { Text("密碼") },
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp, 0.dp)
-                    .background(Color.White)
-            )
-            // 登入按鈕
-            Button(
-                onClick = { /* 处理点击事件 */ },
-
-
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text("登入")
-            }
-            // 切換開關
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text("忘記密碼", color = Color.White)
-                Spacer(modifier = Modifier.width(5.dp))
-                Text("註冊", color = Color.White)
-                Spacer(modifier = Modifier.width(5.dp))
-                Text("訪客登入", color = Color.White)
-                Spacer(Modifier.weight(1f))
-                Text("記住密碼", color = Color.White)
-                Switch(checked = false, onCheckedChange = {})
-            }
+            AccountField(viewModel)
+            PasswordField(viewModel)
+            LoginButton(viewModel,onClick = { /* Handle login click event */ })
+            LinkRow(viewModel)
         }
     }
 }
+
+@Composable
+fun RememberPasswordSwitch(viewModel: LoginViewModel) {
+    val switchState = viewModel.rememberPasswordSwitchState.collectAsState()
+    Switch(
+        checked = switchState.value,
+        onCheckedChange = viewModel::onRememberPasswordSwitchChanged
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AccountField(viewModel: LoginViewModel) {
+    val account by viewModel.accountState.collectAsState()
+    val isPasswordVisible by viewModel.isAccountVisible.collectAsState()
+
+    OutlinedTextField(
+        value = account,
+        onValueChange = viewModel::onTextAccountChange,
+        label = { Text("CMoney帳號 (手機號碼或email)") },
+        leadingIcon = {
+            Icon(
+                painter = painterResource(id = R.drawable.icon_login_person),
+                contentDescription = "帳號圖示",
+                Modifier.size(24.dp)
+            )
+        },
+        trailingIcon = {
+            IconButton(onClick = { viewModel.onTogglePasswordVisibility() }) {
+                Icon(
+                    painter = painterResource(
+                        id = if (isPasswordVisible) R.drawable.icon_open_eye else R.drawable.icon_close_eye
+                    ),
+                    contentDescription = if (isPasswordVisible) "隱藏帳號" else "顯示帳號",
+                    Modifier.size(24.dp)
+                )
+            }
+        },
+        visualTransformation = if (isPasswordVisible) VisualTransformation.None else EmailVisualTransformation(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .background(Color.White)
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PasswordField(viewModel: LoginViewModel) {
+    val passwordState = viewModel.passwordState.collectAsState()
+    OutlinedTextField(
+        value = passwordState.value.text,
+        onValueChange = { viewModel.onTextPasswordChange(TextFieldValue(it)) },
+        label = { Text("密碼") },
+        visualTransformation = PasswordVisualTransformation(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp, 0.dp)
+            .background(Color.White)
+    )
+}
+
+@Composable
+fun LoginButton(viewModel: LoginViewModel,onClick: () -> Unit) {
+    // 获取登录按钮是否应该被启用的状态
+    val isButtonEnabled by viewModel.isLoginButtonEnabled.collectAsState()
+    Button(
+        onClick = onClick,
+        enabled = isButtonEnabled, // 根据状态启用或禁用按钮
+        colors = ButtonStyles.defaultButtonColors(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Text("登入")
+    }
+}
+
+@Composable
+fun LinkRow(viewModel: LoginViewModel) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        Text("忘记密码", color = Color.White)
+        Spacer(modifier = Modifier.width(10.dp))
+        Text("注册", color = Color.White)
+        Spacer(modifier = Modifier.width(10.dp))
+        Text("访客登录", color = Color.White)
+        Spacer(Modifier.weight(1f)) // 这会把剩下的空间占满，把后面的控件推到右边
+        Text("记住密码", color = Color.White)
+        RememberPasswordSwitch(viewModel) // 这个控件会靠右对齐
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
