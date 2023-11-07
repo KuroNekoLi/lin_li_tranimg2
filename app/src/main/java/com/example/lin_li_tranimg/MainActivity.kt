@@ -8,9 +8,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -25,10 +25,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lin_li_tranimg.ui.theme.Lin_li_tranimgTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.lin_li_tranimg.util.EmailVisualTransformation
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +51,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyPage(modifier: Modifier = Modifier,viewModel: LoginViewModel = viewModel()) {
+fun MyPage(modifier: Modifier = Modifier, viewModel: LoginViewModel = viewModel()) {
     val account by viewModel.accountState.collectAsState()
     val password by viewModel.passwordState.collectAsState()
     Box(
@@ -80,9 +82,23 @@ fun MyPage(modifier: Modifier = Modifier,viewModel: LoginViewModel = viewModel()
                     Icon(
                         painter = painterResource(id = R.drawable.icon_login_person),
                         contentDescription = "帳號圖示",
-                        Modifier.size(24.dp,24.dp)
+                        Modifier.size(24.dp, 24.dp)
                     )
                 },
+                trailingIcon = {
+                    // 眼睛圖示，可以通過點擊來切換顯示/隱藏帳號
+                    IconButton(onClick = { viewModel.onTogglePasswordVisibility() }) {
+                        Icon(
+                            painter = painterResource(
+                                id = if (viewModel.isPasswordVisible) R.drawable.icon_open_eye else R.drawable.icon_close_eye
+                            ),
+                            contentDescription = if (viewModel.isPasswordVisible) "隱藏帳號" else "顯示帳號",
+                            Modifier.size(24.dp,24.dp)
+                        )
+                    }
+                },
+                visualTransformation = if (viewModel.isPasswordVisible) VisualTransformation.None else EmailVisualTransformation(),
+
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp, 0.dp)
