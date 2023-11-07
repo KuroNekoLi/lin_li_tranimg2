@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
 class LoginViewModel(private val context: Context) : ViewModel() {
     // 創建PreferencesManager的實例
     private val preferencesManager = PreferencesManager(context)
@@ -27,15 +29,19 @@ class LoginViewModel(private val context: Context) : ViewModel() {
 
     init {
         //從DataStore讀取帳號的可見狀態並更新_isPasswordVisible
-        viewModelScope.launch {
-            preferencesManager.isPasswordVisible.collect { isVisible ->
-                _isAccountVisible.value = isVisible
-            }
+        viewModelScope.launch(Dispatchers.IO) {
+            //記憶的密碼
             preferencesManager.passwordFlow.collect { savedPassword ->
                 if (!savedPassword.isNullOrEmpty()) {
                     _passwordState.value = TextFieldValue(savedPassword)
                     _rememberPasswordSwitchState.value = true
                 }
+            }
+        }
+        viewModelScope.launch(Dispatchers.IO){
+            //眼睛可不可見
+            preferencesManager.isAccountVisible.collect { isVisible ->
+                _isAccountVisible.value = isVisible
             }
         }
     }
@@ -67,6 +73,11 @@ class LoginViewModel(private val context: Context) : ViewModel() {
     fun onRememberPasswordSwitchChanged(remember: Boolean) {
         viewModelScope.launch {
             _rememberPasswordSwitchState.value = remember
+        }
+    }
+
+    fun rememberPassWord(remember: Boolean){
+        viewModelScope.launch {
             if (remember) {
                 preferencesManager.savePassword(_passwordState.value.text)
             } else {
@@ -74,13 +85,10 @@ class LoginViewModel(private val context: Context) : ViewModel() {
             }
         }
     }
-
-    // 检查字符串是否为电子邮箱格式
     private fun isValidEmail(email: TextFieldValue): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email.text).matches()
     }
 
-    // 检查字符串是否为有效的手机号码
     private fun isValidPhone(phone: TextFieldValue): Boolean {
         return phone.text.matches("^09\\d{8}$".toRegex())
     }
@@ -95,7 +103,6 @@ class LoginViewModel(private val context: Context) : ViewModel() {
         _accountState,
         _passwordState
     ) { account, password ->
-        // 检查账号是否为有效的电子邮箱或手机号码，并且密码长度是否大于等于4
         val isAccountValid = isValidEmail(account) || isValidPhone(account)
         val isPasswordValid = isValidPassword(password)
         isAccountValid && isPasswordValid
@@ -104,5 +111,4 @@ class LoginViewModel(private val context: Context) : ViewModel() {
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = false
     )
-
 }

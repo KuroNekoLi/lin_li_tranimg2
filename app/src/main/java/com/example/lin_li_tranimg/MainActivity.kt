@@ -1,6 +1,8 @@
 package com.example.lin_li_tranimg
 
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -31,23 +33,31 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.lin_li_tranimg.MainActivity.Companion.TAG
 import com.example.lin_li_tranimg.ui.theme.ButtonStyles
 import com.example.lin_li_tranimg.ui.theme.Lin_li_tranimgTheme
 import com.example.lin_li_tranimg.util.EmailVisualTransformation
 
 class MainActivity : ComponentActivity() {
+    companion object {
+        const val TAG = "LinLi"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             Lin_li_tranimgTheme {
+                val viewModel: LoginViewModel  = viewModel(factory = LoginViewModelFactory(LocalContext.current))
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MyPage()
+                    MyPage(
+                        Modifier,
+                        viewModel
+                    )
                 }
             }
         }
@@ -55,7 +65,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MyPage(modifier: Modifier = Modifier, viewModel: LoginViewModel = viewModel(factory = LoginViewModelFactory(LocalContext.current))) {
+fun MyPage(modifier: Modifier = Modifier, viewModel: LoginViewModel) {
+
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -77,7 +88,10 @@ fun MyPage(modifier: Modifier = Modifier, viewModel: LoginViewModel = viewModel(
         ) {
             AccountField(viewModel)
             PasswordField(viewModel)
-            LoginButton(viewModel,onClick = { /* Handle login click event */ })
+            LoginButton(viewModel,onClick = {
+                val switchBarState = viewModel.rememberPasswordSwitchState.value
+                viewModel.rememberPassWord(switchBarState)
+            })
             LinkRow(viewModel)
         }
     }
@@ -132,6 +146,7 @@ fun AccountField(viewModel: LoginViewModel) {
 @Composable
 fun PasswordField(viewModel: LoginViewModel) {
     val passwordState = viewModel.passwordState.collectAsState()
+    Log.i(TAG, "text: ${passwordState.value.text}")
     OutlinedTextField(
         value = passwordState.value.text,
         onValueChange = { viewModel.onTextPasswordChange(TextFieldValue(it)) },
@@ -150,7 +165,7 @@ fun LoginButton(viewModel: LoginViewModel,onClick: () -> Unit) {
     val isButtonEnabled by viewModel.isLoginButtonEnabled.collectAsState()
     Button(
         onClick = onClick,
-        enabled = isButtonEnabled, // 根据状态启用或禁用按钮
+        enabled = isButtonEnabled,
         colors = ButtonStyles.defaultButtonColors(),
         modifier = Modifier
             .fillMaxWidth()
@@ -185,7 +200,7 @@ fun LinkRow(viewModel: LoginViewModel) {
 @Composable
 fun GreetingPreview() {
     Lin_li_tranimgTheme {
-        MyPage()
+//        MyPage()
     }
 }
 

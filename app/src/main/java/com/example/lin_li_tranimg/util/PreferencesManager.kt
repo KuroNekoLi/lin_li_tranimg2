@@ -20,7 +20,7 @@ private object PreferencesKeys {
 class PreferencesManager(private val context: Context) {
 
     // 建立Flow以監聽變化
-    val isPasswordVisible: Flow<Boolean> = context.dataStore.data
+    val isAccountVisible: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
             preferences[ACCOUNT_VISIBLE_KEY] ?: true
         }
