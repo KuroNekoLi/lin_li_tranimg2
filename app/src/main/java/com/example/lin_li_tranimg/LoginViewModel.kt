@@ -1,5 +1,6 @@
 package com.example.lin_li_tranimg
 import PreferencesManager
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
@@ -13,7 +14,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class LoginViewModel(private val context: Context) : ViewModel() {
+
+class LoginViewModel( context: Context) : ViewModel() {
     // 創建PreferencesManager的實例
     private val preferencesManager = PreferencesManager(context)
     private val _accountState = MutableStateFlow(TextFieldValue(""))
@@ -38,6 +40,16 @@ class LoginViewModel(private val context: Context) : ViewModel() {
                 }
             }
         }
+        viewModelScope.launch(Dispatchers.IO) {
+            //記憶的帳號
+            preferencesManager.accountFlow.collect { savedAccount ->
+                if (!savedAccount.isNullOrEmpty()) {
+                    _accountState.value = TextFieldValue(savedAccount)
+                    _rememberPasswordSwitchState.value = true
+                }
+            }
+        }
+
         viewModelScope.launch(Dispatchers.IO){
             //眼睛可不可見
             preferencesManager.isAccountVisible.collect { isVisible ->
@@ -68,8 +80,7 @@ class LoginViewModel(private val context: Context) : ViewModel() {
         }
     }
 
-
-    // 记住或清除密码的方法
+    //滑動記住密碼時
     fun onRememberPasswordSwitchChanged(remember: Boolean) {
         viewModelScope.launch {
             _rememberPasswordSwitchState.value = remember
@@ -79,8 +90,10 @@ class LoginViewModel(private val context: Context) : ViewModel() {
     fun rememberPassWord(remember: Boolean){
         viewModelScope.launch {
             if (remember) {
+                preferencesManager.saveAccount(_accountState.value.text)
                 preferencesManager.savePassword(_passwordState.value.text)
             } else {
+                preferencesManager.clearAccount()
                 preferencesManager.clearPassword()
             }
         }
@@ -93,7 +106,6 @@ class LoginViewModel(private val context: Context) : ViewModel() {
         return phone.text.matches("^09\\d{8}$".toRegex())
     }
 
-    // 检查密码长度是否大于等于4
     private fun isValidPassword(password: TextFieldValue): Boolean {
         return password.text.length >= 4
     }

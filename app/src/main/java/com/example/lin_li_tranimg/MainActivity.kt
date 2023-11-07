@@ -67,7 +67,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MyPage(modifier: Modifier = Modifier, viewModel: LoginViewModel) {
 
-
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -89,6 +88,7 @@ fun MyPage(modifier: Modifier = Modifier, viewModel: LoginViewModel) {
             AccountField(viewModel)
             PasswordField(viewModel)
             LoginButton(viewModel,onClick = {
+                //判斷是否記住密碼
                 val switchBarState = viewModel.rememberPasswordSwitchState.value
                 viewModel.rememberPassWord(switchBarState)
             })
@@ -145,10 +145,10 @@ fun AccountField(viewModel: LoginViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordField(viewModel: LoginViewModel) {
-    val passwordState = viewModel.passwordState.collectAsState()
-    Log.i(TAG, "text: ${passwordState.value.text}")
+    val password by viewModel.passwordState.collectAsState()
+    Log.i(TAG, "text: ${password.text}")
     OutlinedTextField(
-        value = passwordState.value.text,
+        value = password.text,
         onValueChange = { viewModel.onTextPasswordChange(TextFieldValue(it)) },
         label = { Text("密碼") },
         visualTransformation = PasswordVisualTransformation(),
@@ -195,6 +195,20 @@ fun LinkRow(viewModel: LoginViewModel) {
     }
 }
 
+@Composable
+fun LoggingDialog(){
+
+}
+
+@Composable
+fun LoggingSuccessDialog(){
+
+}
+
+@Composable
+fun LoggingFailedDialog(){
+
+}
 
 @Preview(showBackground = true)
 @Composable

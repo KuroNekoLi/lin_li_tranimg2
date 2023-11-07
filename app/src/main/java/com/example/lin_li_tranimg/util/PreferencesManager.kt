@@ -1,3 +1,4 @@
+import PreferencesKeys.ACCOUNT_KEY
 import PreferencesKeys.ACCOUNT_VISIBLE_KEY
 import PreferencesKeys.PASSWORD_KEY
 import android.content.Context
@@ -14,22 +15,27 @@ val Context.dataStore by preferencesDataStore(name = "settings")
 private object PreferencesKeys {
     val ACCOUNT_VISIBLE_KEY = booleanPreferencesKey("account_visible")
     val PASSWORD_KEY = stringPreferencesKey("remembered_password")
+    val ACCOUNT_KEY = stringPreferencesKey("remembered_account")
 }
 
 // 從Preferences DataStore讀取內容
 class PreferencesManager(private val context: Context) {
 
-    // 建立Flow以監聽變化
     val isAccountVisible: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
             preferences[ACCOUNT_VISIBLE_KEY] ?: true
         }
 
-    // 从 DataStore 读取密码
     val passwordFlow: Flow<String?> = context.dataStore.data
         .map { preferences ->
             preferences[PASSWORD_KEY]
         }
+
+    val accountFlow: Flow<String?> = context.dataStore.data
+        .map { preferences ->
+            preferences[ACCOUNT_KEY]
+        }
+
     // 向Preferences DataStore寫入數據
     suspend fun updateAccountVisibility(isVisible: Boolean) {
         context.dataStore.edit { preferences ->
@@ -45,6 +51,18 @@ class PreferencesManager(private val context: Context) {
     suspend fun clearPassword() {
         context.dataStore.edit { preferences ->
             preferences[PASSWORD_KEY] = ""
+        }
+    }
+
+    suspend fun saveAccount(account: String){
+        context.dataStore.edit { preferences ->
+            preferences[ACCOUNT_KEY] = account
+        }
+    }
+
+    suspend fun clearAccount() {
+        context.dataStore.edit { preferences ->
+            preferences[ACCOUNT_KEY] = ""
         }
     }
 }
