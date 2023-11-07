@@ -1,6 +1,5 @@
 package com.example.lin_li_tranimg
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -10,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,11 +34,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lin_li_tranimg.MainActivity.Companion.TAG
+import com.example.lin_li_tranimg.domain.LoginRepositoryImpl
 import com.example.lin_li_tranimg.ui.theme.ButtonStyles
 import com.example.lin_li_tranimg.ui.theme.Lin_li_tranimgTheme
 import com.example.lin_li_tranimg.util.EmailVisualTransformation
 
 class MainActivity : ComponentActivity() {
+    private val loginRepository = LoginRepositoryImpl()
     companion object {
         const val TAG = "LinLi"
     }
@@ -48,7 +50,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Lin_li_tranimgTheme {
-                val viewModel: LoginViewModel  = viewModel(factory = LoginViewModelFactory(LocalContext.current))
+                val viewModel: LoginViewModel  = viewModel(factory = LoginViewModelFactory(LocalContext.current,loginRepository))
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -196,18 +198,41 @@ fun LinkRow(viewModel: LoginViewModel) {
 }
 
 @Composable
-fun LoggingDialog(){
-
+fun LoggingLoadingDialog(){
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        CircularProgressIndicator()
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun LoggingLoadingDialogPreview(){
+    LoggingSuccessDialog()
+}
+@Composable
+fun LoggingSuccessDialog() {
+    Box(
+        contentAlignment = Alignment.Center, 
+        modifier = Modifier
+            .size(299.dp, 144.dp)
+            .background(MaterialTheme.colorScheme.onBackground)
+    ) {
+       LoginTextHeader(string = "登入成功")
+    }
 }
 
 @Composable
-fun LoggingSuccessDialog(){
-
+fun LoggingFailedDialog() {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        LoginTextHeader(string = "登入失敗")
+    }
 }
 
 @Composable
-fun LoggingFailedDialog(){
-
+fun LoginTextHeader(string: String){
+    Text(
+        color = Color.White,
+        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+        text = string)
 }
 
 @Preview(showBackground = true)

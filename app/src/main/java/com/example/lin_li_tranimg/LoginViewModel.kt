@@ -2,9 +2,11 @@ package com.example.lin_li_tranimg
 import PreferencesManager
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.compose.runtime.referentialEqualityPolicy
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.lin_li_tranimg.domain.LoginRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,7 +17,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 
-class LoginViewModel( context: Context) : ViewModel() {
+class LoginViewModel( context: Context, private val loginRepository: LoginRepository) : ViewModel() {
     // 創建PreferencesManager的實例
     private val preferencesManager = PreferencesManager(context)
     private val _accountState = MutableStateFlow(TextFieldValue(""))
@@ -123,4 +125,8 @@ class LoginViewModel( context: Context) : ViewModel() {
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = false
     )
+
+    fun getResponseCode():Int{
+        return loginRepository.getResponseCode()
+    }
 }
