@@ -126,7 +126,4 @@ class LoginViewModel( context: Context, private val loginRepository: LoginReposi
         initialValue = false
     )
 
-    fun getResponseCode():Int{
-        return loginRepository.getResponseCode()
-    }
 }

@@ -54,13 +54,15 @@ dependencies {
     // DataStore
     implementation ("androidx.datastore:datastore-preferences:1.0.0")
     // ViewModel
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-$kotlinVersion") // Use the latest version
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-$kotlinVersion")
     // LiveData
-    implementation ("androidx.lifecycle:lifecycle-livedata-$kotlinVersion") // Use the latest version
+    implementation ("androidx.lifecycle:lifecycle-livedata-$kotlinVersion")
     // Lifecycle runtime for collecting flows in the ViewModel
-    implementation ("androidx.lifecycle:lifecycle-runtime-$kotlinVersion") // Use the latest version
+    implementation ("androidx.lifecycle:lifecycle-runtime-$kotlinVersion")
     // Compose ViewModel
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2") // Use the latest version
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    //Nav Compose
+    implementation("androidx.navigation:navigation-compose:2.5.3")
     //backend2
     implementation("com.cmoney.backend2:backend2:5.58.0")
     implementation("com.cmoney.logdatarecorder:logdatarecorder-data:5.5.0")
