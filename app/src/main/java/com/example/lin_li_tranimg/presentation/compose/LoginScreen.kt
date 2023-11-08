@@ -1,6 +1,5 @@
 package com.example.lin_li_tranimg.presentation.compose
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,11 +37,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.lin_li_tranimg.LoginViewModel
 import com.example.lin_li_tranimg.LoginViewModelFactory
-import com.example.lin_li_tranimg.MainActivity
 import com.example.lin_li_tranimg.MainActivity.Companion.FORGET_PASSWORD_SCREEN
 import com.example.lin_li_tranimg.MainActivity.Companion.GUEST_SCREEN
 import com.example.lin_li_tranimg.MainActivity.Companion.REGISTER_SCREEN
@@ -81,12 +80,12 @@ fun LoginScreen(
         ) {
             AccountField(viewModel)
             PasswordField(viewModel)
+            AboveLoginButtonRow(viewModel,navController)
             LoginButton(viewModel,onClick = {
                 //判斷是否記住密碼
                 val switchBarState = viewModel.rememberPasswordSwitchState.value
                 viewModel.rememberPassWord(switchBarState)
             })
-            UnderLoginRow(viewModel,navController)
         }
     }
 }
@@ -109,7 +108,11 @@ fun AccountField(viewModel: LoginViewModel) {
     OutlinedTextField(
         value = account,
         onValueChange = viewModel::onTextAccountChange,
-        label = { Text("CMoney帳號 (手機號碼或email)") },
+        label = {
+            Text(text = "CMoney帳號 (手機號碼或email)",
+                 fontSize = MaterialTheme.typography.bodyMedium.fontSize
+            )
+        },
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.icon_login_person),
@@ -145,12 +148,23 @@ fun AccountField(viewModel: LoginViewModel) {
 @Composable
 fun PasswordField(viewModel: LoginViewModel) {
     val password by viewModel.passwordState.collectAsState()
-    Log.i(MainActivity.TAG, "text: ${password.text}")
     OutlinedTextField(
         value = password.text,
         onValueChange = { viewModel.onTextPasswordChange(TextFieldValue(it)) },
-        label = { Text("密碼") },
+        label = {
+            Text(text = "密碼",
+                fontSize = MaterialTheme.typography.bodyMedium.fontSize
+            )
+        },
+        leadingIcon = {
+            Icon(
+                painter = painterResource(id = R.drawable.icon_password),
+                contentDescription = "帳號圖示",
+                Modifier.size(24.dp)
+            )
+        },
         visualTransformation = PasswordVisualTransformation(),
+        textStyle = TextStyle(fontSize = 24.sp),
         colors = TextFieldDefaults.outlinedTextFieldColors(
 //            focusedLabelColor = Color.Black, // 当TextField被选中时Label的颜色
             unfocusedLabelColor = Color.Gray, // 当TextField未被选中时Label的颜色
@@ -180,7 +194,7 @@ fun LoginButton(viewModel: LoginViewModel, onClick: () -> Unit) {
 }
 
 @Composable
-fun UnderLoginRow(
+fun AboveLoginButtonRow(
     viewModel: LoginViewModel,
     navController: NavController
 ) {
