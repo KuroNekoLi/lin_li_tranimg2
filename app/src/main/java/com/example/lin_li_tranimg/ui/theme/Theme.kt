@@ -24,34 +24,20 @@ private val LightColorScheme = lightColorScheme(
     primary = Yellow,
     secondary = PurpleGrey40,
     tertiary = Pink40,
-    background = Color(0xFFBA511F),
-    onBackground = Dark,
-    surface = Color(0xFF2B202B),
-    onSurface = Color(0xFF463D46)
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    background = Color.Black,
+    onBackground = Color.White,
+//    onBackground = Color.Black,
+    surface = Gray,
+    onSurface = Color.White
+//    onSurface = Color.Black
 )
 
 @Composable
 fun Lin_li_tranimgTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-//        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-//            val context = LocalContext.current
-//            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-//        }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }

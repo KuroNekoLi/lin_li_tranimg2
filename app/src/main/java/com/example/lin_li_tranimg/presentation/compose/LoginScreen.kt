@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
@@ -46,6 +48,7 @@ import com.example.lin_li_tranimg.MainActivity.Companion.GUEST_SCREEN
 import com.example.lin_li_tranimg.MainActivity.Companion.REGISTER_SCREEN
 import com.example.lin_li_tranimg.R
 import com.example.lin_li_tranimg.ui.theme.ButtonStyles
+import com.example.lin_li_tranimg.ui.theme.DialogBackgroundColor
 import com.example.lin_li_tranimg.ui.theme.Lin_li_tranimgTheme
 import com.example.lin_li_tranimg.ui.theme.Yellow
 import com.example.lin_li_tranimg.util.EmailVisualTransformation
@@ -126,6 +129,11 @@ fun AccountField(viewModel: LoginViewModel) {
             }
         },
         visualTransformation = if (isPasswordVisible) VisualTransformation.None else EmailVisualTransformation(),
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+//            focusedLabelColor = Color.Black, // 当TextField被选中时Label的颜色
+            unfocusedLabelColor = Color.Gray, // 当TextField未被选中时Label的颜色
+            textColor = Color.Black
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
@@ -143,6 +151,11 @@ fun PasswordField(viewModel: LoginViewModel) {
         onValueChange = { viewModel.onTextPasswordChange(TextFieldValue(it)) },
         label = { Text("密碼") },
         visualTransformation = PasswordVisualTransformation(),
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+//            focusedLabelColor = Color.Black, // 当TextField被选中时Label的颜色
+            unfocusedLabelColor = Color.Gray, // 当TextField未被选中时Label的颜色
+            textColor = Color.Black
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp, 0.dp)
@@ -213,7 +226,7 @@ fun LoggingLoadingDialog(){
     Column(
         modifier = Modifier
             .size(299.dp, 144.dp)
-            .background(MaterialTheme.colorScheme.onBackground),
+            .background(DialogBackgroundColor),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -235,7 +248,7 @@ fun LoginSuccessDialog() {
     Column(
         modifier = Modifier
             .size(299.dp, 144.dp)
-            .background(MaterialTheme.colorScheme.onBackground),
+            .background(DialogBackgroundColor),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -254,7 +267,7 @@ fun LoginFailedDialog() {
     Column(
         modifier = Modifier
             .size(299.dp, 178.dp)
-            .background(MaterialTheme.colorScheme.onBackground),
+            .background(DialogBackgroundColor),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

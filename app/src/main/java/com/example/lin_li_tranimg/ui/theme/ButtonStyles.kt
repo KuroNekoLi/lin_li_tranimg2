@@ -12,7 +12,7 @@ object ButtonStyles {
     fun defaultButtonColors() = ButtonDefaults.buttonColors(
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = Color.Black,
-        disabledContainerColor = MaterialTheme.colorScheme.surface,
-        disabledContentColor = MaterialTheme.colorScheme.onSurface
+        disabledContainerColor = DialogBackgroundColor,
+        disabledContentColor = DialogTextColor
     )
 }

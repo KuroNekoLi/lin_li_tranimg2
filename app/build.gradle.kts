@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.example.lin_li_tranimg"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.lin_li_tranimg"
@@ -50,6 +50,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.compose.ui:ui-text-android:1.5.4")
     val kotlinVersion = "ktx:2.6.2"
     // DataStore
     implementation ("androidx.datastore:datastore-preferences:1.0.0")

@@ -24,13 +24,13 @@ fun AppNavHost(
             LoginScreen(factory = factory, navController = navController)
         }
         composable(route = REGISTER_SCREEN){
-            RegisterScreen(string = "註冊畫面")
+            RegisterScreen(string = "註冊畫面", navController = navController)
         }
         composable(route = GUEST_SCREEN){
-            GuestScreen(string = "訪客畫面")
+            GuestScreen(string = "訪客畫面", navController = navController)
         }
         composable(route = FORGET_PASSWORD_SCREEN){
-            ForgetPasswordScreen(string = "忘記密碼畫面")
+            ForgetPasswordScreen(string = "忘記密碼畫面", navController = navController)
         }
     }
 }
