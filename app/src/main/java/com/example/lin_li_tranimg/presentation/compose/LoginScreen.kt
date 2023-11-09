@@ -3,6 +3,7 @@ package com.example.lin_li_tranimg.presentation.compose
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,8 +25,12 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,27 +43,47 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.lin_li_tranimg.LoginViewModel
-import com.example.lin_li_tranimg.LoginViewModelFactory
 import com.example.lin_li_tranimg.MainActivity.Companion.FORGET_PASSWORD_SCREEN
 import com.example.lin_li_tranimg.MainActivity.Companion.GUEST_SCREEN
 import com.example.lin_li_tranimg.MainActivity.Companion.REGISTER_SCREEN
 import com.example.lin_li_tranimg.R
 import com.example.lin_li_tranimg.ui.theme.ButtonStyles
 import com.example.lin_li_tranimg.ui.theme.DialogBackgroundColor
-import com.example.lin_li_tranimg.ui.theme.Lin_li_tranimgTheme
 import com.example.lin_li_tranimg.ui.theme.Yellow
 import com.example.lin_li_tranimg.util.EmailVisualTransformation
 
 @Composable
 fun LoginScreen(
     navController: NavController,
-    modifier:Modifier = Modifier,
-    factory: LoginViewModelFactory,
-    viewModel: LoginViewModel = viewModel(factory = factory)
+    modifier: Modifier = Modifier,
+    viewModel: LoginViewModel
 ) {
+    // 用于控制对话框显示的状态
+    var showDialog by remember { mutableStateOf(false) }
+    var dialogContent by remember { mutableStateOf<@Composable () -> Unit>({}) }
+
+    // LaunchedEffect用于监听一次性事件
+    LaunchedEffect(Unit) {
+        viewModel.loginEvent.collect { event ->
+            showDialog = true
+            dialogContent = when (event) {
+                LoginViewModel.LoginEvent.ShowLoading -> {
+                    { LoginLoadingDialog() }
+                }
+
+                LoginViewModel.LoginEvent.ShowSuccess -> {
+                    { LoginSuccessDialog() }
+                }
+
+                LoginViewModel.LoginEvent.ShowFailure -> {
+                    { LoginFailedDialog(onDismiss = { showDialog = false }) }
+                }
+            }
+        }
+    }
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -80,14 +105,23 @@ fun LoginScreen(
         ) {
             AccountField(viewModel)
             PasswordField(viewModel)
-            AboveLoginButtonRow(viewModel,navController)
-            LoginButton(viewModel,onClick = {
+            AboveLoginButtonRow(viewModel, navController)
+            LoginButton(viewModel, onClick = {
                 //判斷是否記住密碼
                 val switchBarState = viewModel.rememberPasswordSwitchState.value
+                val account = viewModel.accountState.value.text
+                val password = viewModel.passwordState.value.text
                 viewModel.rememberPassWord(switchBarState)
+                //調用login方法
+                viewModel.login(account, password)
             })
         }
+        // 根据状态显示对话框
+        if (showDialog) {
+            dialogContent()
+        }
     }
+
 }
 
 @Composable
@@ -109,8 +143,9 @@ fun AccountField(viewModel: LoginViewModel) {
         value = account,
         onValueChange = viewModel::onTextAccountChange,
         label = {
-            Text(text = "CMoney帳號 (手機號碼或email)",
-                 fontSize = MaterialTheme.typography.bodyMedium.fontSize
+            Text(
+                text = "CMoney帳號 (手機號碼或email)",
+                fontSize = MaterialTheme.typography.bodyMedium.fontSize
             )
         },
         leadingIcon = {
@@ -152,7 +187,8 @@ fun PasswordField(viewModel: LoginViewModel) {
         value = password.text,
         onValueChange = { viewModel.onTextPasswordChange(TextFieldValue(it)) },
         label = {
-            Text(text = "密碼",
+            Text(
+                text = "密碼",
                 fontSize = MaterialTheme.typography.bodyMedium.fontSize
             )
         },
@@ -218,7 +254,8 @@ fun AboveLoginButtonRow(
                 navController.navigate(REGISTER_SCREEN)
             },
             text = "註冊",
-            color = Color.White)
+            color = Color.White
+        )
         Spacer(modifier = Modifier.width(10.dp))
         Text(
             modifier = Modifier.clickable {
@@ -230,13 +267,14 @@ fun AboveLoginButtonRow(
         Spacer(Modifier.weight(1f)) // 这会把剩下的空间占满，把后面的控件推到右边
         Text(
             text = "記住密碼",
-            color = Color.White)
+            color = Color.White
+        )
         RememberPasswordSwitch(viewModel) // 这个控件会靠右对齐
     }
 }
 
 @Composable
-fun LoggingLoadingDialog(){
+fun LoginLoadingDialog() {
     Column(
         modifier = Modifier
             .size(299.dp, 144.dp)
@@ -252,11 +290,7 @@ fun LoggingLoadingDialog(){
         LoginTextBody(string = "登入中，請您稍候...")
     }
 }
-@Preview(showBackground = true)
-@Composable
-fun LoginLoadingDialogPreview(){
-    LoggingLoadingDialog()
-}
+
 @Composable
 fun LoginSuccessDialog() {
     Column(
@@ -277,46 +311,52 @@ fun LoginSuccessDialog() {
 }
 
 @Composable
-fun LoginFailedDialog() {
-    Column(
-        modifier = Modifier
-            .size(299.dp, 178.dp)
-            .background(DialogBackgroundColor),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        LoginTextHeader(string = "登入失敗")
-        Icon(
-            painter = painterResource(id = R.drawable.icon_login_fail),
-            contentDescription = "登入失敗",
-            Modifier.size(64.dp),
-            tint = Yellow
-        )
-        LoginTextBody(string = "登入失敗的錯誤訊息")
+fun LoginFailedDialog(onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .size(299.dp, 178.dp)
+                .background(DialogBackgroundColor)
+                .clickable(
+                    indication = null,
+                    interactionSource = remember {
+                        MutableInteractionSource()
+                    }) { /* 使得点击对话框内部不会关闭对话框 */ },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            LoginTextHeader(string = "登入失敗")
+            Icon(
+                painter = painterResource(id = R.drawable.icon_login_fail),
+                contentDescription = "登入失敗",
+                Modifier.size(64.dp),
+                tint = Yellow
+            )
+            LoginTextBody(string = "登入失敗的錯誤訊息")
+        }
     }
 }
 
 @Composable
-fun LoginTextHeader(string: String){
+fun LoginTextHeader(string: String) {
     Text(
         color = Color.White,
         fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-        text = string)
+        text = string
+    )
 }
 
 @Composable
-fun LoginTextBody(string: String){
+fun LoginTextBody(string: String) {
     Text(
         color = Color.White,
         fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-        text = string)
+        text = string
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    Lin_li_tranimgTheme {
-//        MyPage()
-    }
+fun LoginLoadingDialogPreview() {
+    LoginLoadingDialog()
 }
-

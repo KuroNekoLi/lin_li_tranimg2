@@ -10,7 +10,7 @@ import androidx.navigation.NavController
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ForgetPasswordScreen(string: String, navController: NavController){
+fun ForgetPasswordScreen(string: String, navController: NavController) {
     Scaffold(
         topBar = {
             CommonTopAppBar(

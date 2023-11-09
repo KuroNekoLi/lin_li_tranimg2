@@ -42,7 +42,8 @@ class PreferencesManager(private val context: Context) {
             preferences[ACCOUNT_VISIBLE_KEY] = isVisible
         }
     }
-    suspend fun savePassword(password: String){
+
+    suspend fun savePassword(password: String) {
         context.dataStore.edit { preferences ->
             preferences[PASSWORD_KEY] = password
         }
@@ -54,7 +55,7 @@ class PreferencesManager(private val context: Context) {
         }
     }
 
-    suspend fun saveAccount(account: String){
+    suspend fun saveAccount(account: String) {
         context.dataStore.edit { preferences ->
             preferences[ACCOUNT_KEY] = account
         }

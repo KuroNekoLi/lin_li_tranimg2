@@ -1,10 +1,9 @@
 package com.example.lin_li_tranimg.util
 
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 
 class EmailVisualTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
