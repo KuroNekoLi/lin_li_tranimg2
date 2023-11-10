@@ -27,5 +27,4 @@ class LoginRepositoryImpl(private val preferencesManager: PreferencesManager) : 
     override suspend fun updateAccountVisibility(visible: Boolean) {
         return preferencesManager.updateAccountVisibility(visible)
     }
-
 }

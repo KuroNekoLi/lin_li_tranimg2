@@ -38,7 +38,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -62,7 +61,6 @@ fun LoginScreen(
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel
 ) {
-    // 创建一个状态来保存当前要显示的对话框
     var currentDialog by remember { mutableStateOf<@Composable (() -> Unit)?>(null) }
 
     LaunchedEffect(key1 = true) {
@@ -85,17 +83,20 @@ fun LoginScreen(
                 }
 
                 is UIEvent.ShowErrorDialog -> {
-                    currentDialog = { LoginFailedDialog {
-                        currentDialog = null
-                    } }
+                    val errorText = viewModel.loginScreenState.value.errorText
+                    currentDialog = {
+                        LoginFailedDialog(errorText) {
+                            currentDialog = null
+                        }
+                    }
                 }
 
                 is UIEvent.ShowSuccessDialog -> {
-                    currentDialog = { LoginSuccessDialog() }
+                    currentDialog = { LoginSuccessDialog {} }
                 }
 
                 is UIEvent.ShowLoadingDialog -> {
-                    currentDialog = { LoginLoadingDialog() }
+                    currentDialog = { LoginLoadingDialog {} }
                 }
             }
         }
@@ -105,12 +106,11 @@ fun LoginScreen(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        // 設定背景圖片
         Image(
             painter = painterResource(id = R.drawable.bg),
             contentDescription = "背景圖片",
-            contentScale = ContentScale.Crop, // 根據需要調整，這會確保圖片填滿容器
-            modifier = modifier.matchParentSize() // 圖片將填滿Box容器
+            contentScale = ContentScale.Crop,
+            modifier = modifier.matchParentSize()
         )
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -134,7 +134,6 @@ fun LoginScreen(
 
 @Composable
 fun RememberPasswordSwitch(viewModel: LoginViewModel) {
-    // 从ViewModel获取记住密码开关的当前状态
     val isRememberSwitchBarOn = viewModel.loginScreenState.value.isRememberSwitchBarOn
     Switch(
         checked = isRememberSwitchBarOn,
@@ -179,8 +178,7 @@ fun AccountField(viewModel: LoginViewModel) {
         },
         visualTransformation = if (isPasswordVisible) VisualTransformation.None else EmailVisualTransformation(),
         colors = TextFieldDefaults.outlinedTextFieldColors(
-//            focusedLabelColor = Color.Black, // 当TextField被选中时Label的颜色
-            unfocusedLabelColor = Color.Gray, // 当TextField未被选中时Label的颜色
+            unfocusedLabelColor = Color.Gray,
             textColor = Color.Black
         ),
         modifier = Modifier
@@ -215,8 +213,7 @@ fun PasswordField(viewModel: LoginViewModel) {
         visualTransformation = PasswordVisualTransformation(),
         textStyle = TextStyle(fontSize = 24.sp),
         colors = TextFieldDefaults.outlinedTextFieldColors(
-//            focusedLabelColor = Color.Black, // 当TextField被选中时Label的颜色
-            unfocusedLabelColor = Color.Gray, // 当TextField未被选中时Label的颜色
+            unfocusedLabelColor = Color.Gray,
             textColor = Color.Black
         ),
         modifier = Modifier
@@ -228,7 +225,6 @@ fun PasswordField(viewModel: LoginViewModel) {
 
 @Composable
 fun LoginButton(viewModel: LoginViewModel, onClick: () -> Unit) {
-    // 获取登录按钮是否应该被启用的状态
     val isButtonEnabled = viewModel.loginScreenState.value.isLoginButtonEnabled
     Button(
         onClick = onClick,
@@ -277,54 +273,58 @@ fun AboveLoginButtonRow(
             text = "訪客登入",
             color = Color.White
         )
-        Spacer(Modifier.weight(1f)) // 这会把剩下的空间占满，把后面的控件推到右边
+        Spacer(Modifier.weight(1f))
         Text(
             text = "記住密碼",
             color = Color.White
         )
-        RememberPasswordSwitch(viewModel) // 这个控件会靠右对齐
+        RememberPasswordSwitch(viewModel)
     }
 }
 
 @Composable
-fun LoginLoadingDialog() {
-    Column(
-        modifier = Modifier
-            .size(299.dp, 144.dp)
-            .background(DialogBackgroundColor),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        CircularProgressIndicator(
+fun LoginLoadingDialog(onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
             modifier = Modifier
-                .width(64.dp),
-            color = Yellow
-        )
-        LoginTextBody(string = "登入中，請您稍候...")
+                .size(299.dp, 144.dp)
+                .background(DialogBackgroundColor),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .width(64.dp),
+                color = Yellow
+            )
+            LoginTextBody(string = "登入中，請您稍候...")
+        }
     }
 }
 
 @Composable
-fun LoginSuccessDialog() {
-    Column(
-        modifier = Modifier
-            .size(299.dp, 144.dp)
-            .background(DialogBackgroundColor),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        LoginTextHeader(string = "登入成功")
-        Icon(
-            painter = painterResource(id = R.drawable.icon_login_success),
-            contentDescription = "登入成功",
-            Modifier.size(64.dp),
-            tint = Yellow
-        )
+fun LoginSuccessDialog(onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .size(299.dp, 144.dp)
+                .background(DialogBackgroundColor),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            LoginTextHeader(string = "登入成功")
+            Icon(
+                painter = painterResource(id = R.drawable.icon_login_success),
+                contentDescription = "登入成功",
+                Modifier.size(64.dp),
+                tint = Yellow
+            )
+        }
     }
 }
 
 @Composable
-fun LoginFailedDialog(onDismiss: () -> Unit) {
+fun LoginFailedDialog(errorMessage: String, onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
@@ -334,7 +334,9 @@ fun LoginFailedDialog(onDismiss: () -> Unit) {
                     indication = null,
                     interactionSource = remember {
                         MutableInteractionSource()
-                    }) { /* 使得点击对话框内部不会关闭对话框 */ },
+                    }) {
+
+                },
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -345,7 +347,7 @@ fun LoginFailedDialog(onDismiss: () -> Unit) {
                 Modifier.size(64.dp),
                 tint = Yellow
             )
-            LoginTextBody(string = "登入失敗的錯誤訊息")
+            LoginTextBody(string = errorMessage)
         }
     }
 }
@@ -368,8 +370,3 @@ fun LoginTextBody(string: String) {
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun LoginLoadingDialogPreview() {
-    LoginLoadingDialog()
-}

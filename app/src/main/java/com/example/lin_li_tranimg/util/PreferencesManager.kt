@@ -9,7 +9,6 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-// 在Kotlin檔案頂層建立DataStore實例
 val Context.dataStore by preferencesDataStore(name = "settings")
 
 private object PreferencesKeys {
@@ -18,7 +17,6 @@ private object PreferencesKeys {
     val ACCOUNT_KEY = stringPreferencesKey("remembered_account")
 }
 
-// 從Preferences DataStore讀取內容
 class PreferencesManager(private val context: Context) {
 
     val isAccountVisible: Flow<Boolean> = context.dataStore.data

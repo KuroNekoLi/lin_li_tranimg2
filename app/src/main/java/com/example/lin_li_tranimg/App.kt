@@ -26,7 +26,6 @@ class App : Application() {
             androidContext(this@App)
             loadKoinModules(
                 listOf(
-                    // 在此宣告需要的定義
                     backendServicesModule,
                     appModule
                 )

@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cmoney.backend2.base.model.exception.ServerException
 import com.cmoney.backend2.identityprovider.service.IdentityProviderWeb
 import com.cmoney.backend2.identityprovider.service.api.gettoken.GetTokenResponseBody
 import com.example.lin_li_tranimg.domain.LoginRepository
@@ -15,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.math.BigInteger
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -31,7 +33,8 @@ class LoginViewModel(
             passwordText = "",
             isEyeOpened = true,
             isRememberSwitchBarOn = false,
-            isLoginButtonEnabled = false
+            isLoginButtonEnabled = false,
+            errorText = ""
         )
     )
 
@@ -41,31 +44,38 @@ class LoginViewModel(
     val uiEventFlow = _uiEventFlow.asSharedFlow()
 
     init {
-        //從DataStore讀取帳號的可見狀態並更新_isPasswordVisible
         viewModelScope.launch(Dispatchers.IO) {
-            //記憶的密碼
             loginRepository.savedPasswordFlow().collect { savedPassword ->
                 if (!savedPassword.isNullOrEmpty()) {
-                    _loginScreenState.value.passwordText = savedPassword
+                    withContext(Dispatchers.Main) {
+                        _loginScreenState.value =
+                            _loginScreenState.value.copy(passwordText = savedPassword)
+                        updateLoginButtonState()
+                    }
                 }
             }
         }
         viewModelScope.launch(Dispatchers.IO) {
-            //記憶的帳號
             loginRepository.savedAccountFlow().collect { savedAccount ->
                 if (!savedAccount.isNullOrEmpty()) {
-                    _loginScreenState.value.accountText = savedAccount
+                    withContext(Dispatchers.Main) {
+                        _loginScreenState.value =
+                            _loginScreenState.value.copy(accountText = savedAccount)
+                        updateLoginButtonState()
+                    }
                 }
             }
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            //眼睛可不可見
             loginRepository.isAccountVisibleFlow().collect { isVisible ->
-                _loginScreenState.value.isEyeOpened = isVisible
+                withContext(Dispatchers.Main) {
+                    _loginScreenState.value = _loginScreenState.value.copy(isEyeOpened = isVisible)
+                }
             }
         }
     }
+
 
     private fun isValidEmail(email: TextFieldValue): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email.text).matches()
@@ -79,7 +89,7 @@ class LoginViewModel(
         return password.text.length >= 4
     }
 
-    fun login(account: String, password: String) {
+    private fun login(account: String, password: String) {
         val md5edPassword = try {
             password.md5().orEmpty()
         } catch (e: Exception) {
@@ -109,8 +119,13 @@ class LoginViewModel(
             }
 
             if (result.isFailure) {
+                val errorMessage =
+                    (result.exceptionOrNull() as? ServerException)?.message ?: "登入失敗"
                 _uiEventFlow.emit(
-                    UIEvent.ShowErrorDialog("登入失敗")
+                    UIEvent.ShowErrorDialog
+                )
+                _loginScreenState.value = loginScreenState.value.copy(
+                    errorText = errorMessage
                 )
             }
         }
@@ -153,7 +168,6 @@ class LoginViewModel(
                     isEyeOpened = !loginScreenState.value.isEyeOpened
                 )
                 viewModelScope.launch {
-                    // 更新DataStore中的可見狀態
                     loginRepository.updateAccountVisibility(_loginScreenState.value.isEyeOpened)
                 }
             }
@@ -190,7 +204,6 @@ class LoginViewModel(
 
             is LoginEvent.LoginButtonClicked -> {
                 viewModelScope.launch {
-                    //只有在記住密碼為on時將資料儲存，否則清掉
                     if (loginScreenState.value.isRememberSwitchBarOn) {
 
                         loginRepository.saveUserData(
@@ -204,6 +217,16 @@ class LoginViewModel(
                 }
             }
         }
+    }
+
+    private fun updateLoginButtonState() {
+        val isValidAccount = isValidEmail(TextFieldValue(_loginScreenState.value.accountText)) ||
+                isValidPhone(TextFieldValue(_loginScreenState.value.accountText))
+        val isValidPassword = isValidPassword(TextFieldValue(_loginScreenState.value.passwordText))
+        _loginScreenState.value = _loginScreenState.value.copy(
+            isLoginButtonEnabled = isValidAccount && isValidPassword,
+            isRememberSwitchBarOn = true
+        )
     }
 }
 

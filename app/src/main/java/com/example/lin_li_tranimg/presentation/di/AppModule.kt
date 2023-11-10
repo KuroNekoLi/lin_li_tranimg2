@@ -24,10 +24,8 @@ val appModule = module {
         }
     }
     single { PreferencesManager(context = androidContext()) }
-    // Providing the implementation for LoginRepository interface
     single<LoginRepository> { LoginRepositoryImpl(get()) }
 
-    // Define LoginViewModel with required dependencies
     viewModel {
         LoginViewModel(
             loginRepository = get(),
