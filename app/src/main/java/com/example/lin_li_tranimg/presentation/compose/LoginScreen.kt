@@ -26,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,7 +37,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,6 +44,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.lin_li_tranimg.R
+import com.example.lin_li_tranimg.presentation.LoginEvent
+import com.example.lin_li_tranimg.presentation.UIEvent
 import com.example.lin_li_tranimg.presentation.activity.MainActivity.Companion.FORGET_PASSWORD_SCREEN
 import com.example.lin_li_tranimg.presentation.activity.MainActivity.Companion.GUEST_SCREEN
 import com.example.lin_li_tranimg.presentation.activity.MainActivity.Companion.REGISTER_SCREEN
@@ -62,30 +62,40 @@ fun LoginScreen(
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel
 ) {
-    // 用于控制对话框显示的状态
-    var showDialog by remember { mutableStateOf(false) }
-    var dialogContent by remember { mutableStateOf<@Composable () -> Unit>({}) }
+    // 创建一个状态来保存当前要显示的对话框
+    var currentDialog by remember { mutableStateOf<@Composable (() -> Unit)?>(null) }
 
-    // LaunchedEffect用于监听一次性事件
-    LaunchedEffect(Unit) {
-        viewModel.loginEvent.collect { event ->
-            showDialog = true
-            dialogContent = when (event) {
-                LoginViewModel.LoginEvent.ShowLoading -> {
-                    { LoginLoadingDialog() }
+    LaunchedEffect(key1 = true) {
+        viewModel.uiEventFlow.collect { event ->
+            when (event) {
+                is UIEvent.NavigateToHomeScreen -> {
+                    navController.navigate(STOCK_SCREEN)
                 }
 
-                LoginViewModel.LoginEvent.ShowSuccess -> {
-                    {
-                        LoginSuccessDialog()
-                        navController.navigate(STOCK_SCREEN)
-                    }
+                is UIEvent.NavigateToRegisterScreen -> {
+                    navController.navigate(REGISTER_SCREEN)
                 }
 
-                LoginViewModel.LoginEvent.ShowFailure -> {
-                    {
-                        LoginFailedDialog(onDismiss = { showDialog = false })
-                    }
+                is UIEvent.NavigateToForgetPasswordScreen -> {
+                    navController.navigate(FORGET_PASSWORD_SCREEN)
+                }
+
+                is UIEvent.NavigateToGuestScreen -> {
+                    navController.navigate(GUEST_SCREEN)
+                }
+
+                is UIEvent.ShowErrorDialog -> {
+                    currentDialog = { LoginFailedDialog {
+                        currentDialog = null
+                    } }
+                }
+
+                is UIEvent.ShowSuccessDialog -> {
+                    currentDialog = { LoginSuccessDialog() }
+                }
+
+                is UIEvent.ShowLoadingDialog -> {
+                    currentDialog = { LoginLoadingDialog() }
                 }
             }
         }
@@ -113,18 +123,10 @@ fun LoginScreen(
             PasswordField(viewModel)
             AboveLoginButtonRow(viewModel, navController)
             LoginButton(viewModel, onClick = {
-                //判斷是否記住密碼
-                val switchBarState = viewModel.rememberPasswordSwitchState.value
-                val account = viewModel.accountState.value.text
-                val password = viewModel.passwordState.value.text
-                viewModel.rememberPassWord(switchBarState)
-                //調用login方法
-                viewModel.login(account, password)
+                viewModel.onEvent(LoginEvent.LoginButtonClicked)
             })
-        }
-        // 根据状态显示对话框
-        if (showDialog) {
-            dialogContent()
+            // 顯示登入狀態的對話框
+            currentDialog?.invoke()
         }
     }
 
@@ -132,22 +134,25 @@ fun LoginScreen(
 
 @Composable
 fun RememberPasswordSwitch(viewModel: LoginViewModel) {
-    val switchState = viewModel.rememberPasswordSwitchState.collectAsState()
+    // 从ViewModel获取记住密码开关的当前状态
+    val isRememberSwitchBarOn = viewModel.loginScreenState.value.isRememberSwitchBarOn
     Switch(
-        checked = switchState.value,
-        onCheckedChange = viewModel::onRememberPasswordSwitchChanged
+        checked = isRememberSwitchBarOn,
+        onCheckedChange = { viewModel.onEvent(LoginEvent.RememberBarSwitched) }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountField(viewModel: LoginViewModel) {
-    val account by viewModel.accountState.collectAsState()
-    val isPasswordVisible by viewModel.isAccountVisible.collectAsState()
+    val account = viewModel.loginScreenState.value.accountText
+    val isPasswordVisible = viewModel.loginScreenState.value.isEyeOpened
 
     OutlinedTextField(
         value = account,
-        onValueChange = viewModel::onTextAccountChange,
+        onValueChange = { newText ->
+            viewModel.onEvent(LoginEvent.AccountTextEntered(newText))
+        },
         label = {
             Text(
                 text = "CMoney帳號 (手機號碼或email)",
@@ -162,7 +167,7 @@ fun AccountField(viewModel: LoginViewModel) {
             )
         },
         trailingIcon = {
-            IconButton(onClick = { viewModel.onTogglePasswordVisibility() }) {
+            IconButton(onClick = { viewModel.onEvent(LoginEvent.IconEyeClicked) }) {
                 Icon(
                     painter = painterResource(
                         id = if (isPasswordVisible) R.drawable.icon_open_eye else R.drawable.icon_close_eye
@@ -188,10 +193,12 @@ fun AccountField(viewModel: LoginViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordField(viewModel: LoginViewModel) {
-    val password by viewModel.passwordState.collectAsState()
+    val password = viewModel.loginScreenState.value.passwordText
     OutlinedTextField(
-        value = password.text,
-        onValueChange = { viewModel.onTextPasswordChange(TextFieldValue(it)) },
+        value = password,
+        onValueChange = { newText ->
+            viewModel.onEvent(LoginEvent.PasswordTextEntered(newText))
+        },
         label = {
             Text(
                 text = "密碼",
@@ -222,7 +229,7 @@ fun PasswordField(viewModel: LoginViewModel) {
 @Composable
 fun LoginButton(viewModel: LoginViewModel, onClick: () -> Unit) {
     // 获取登录按钮是否应该被启用的状态
-    val isButtonEnabled by viewModel.isLoginButtonEnabled.collectAsState()
+    val isButtonEnabled = viewModel.loginScreenState.value.isLoginButtonEnabled
     Button(
         onClick = onClick,
         enabled = isButtonEnabled,
