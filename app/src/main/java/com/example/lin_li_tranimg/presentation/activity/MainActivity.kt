@@ -1,4 +1,4 @@
-package com.example.lin_li_tranimg
+package com.example.lin_li_tranimg.presentation.activity
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.example.lin_li_tranimg.presentation.compose.AppNavHost
+import com.example.lin_li_tranimg.presentation.viewmodel.LoginViewModel
 import com.example.lin_li_tranimg.ui.theme.Lin_li_tranimgTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 

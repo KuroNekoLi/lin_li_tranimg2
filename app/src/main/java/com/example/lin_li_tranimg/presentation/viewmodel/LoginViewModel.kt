@@ -1,4 +1,4 @@
-package com.example.lin_li_tranimg
+package com.example.lin_li_tranimg.presentation.viewmodel
 
 import PreferencesManager
 import android.content.Context
@@ -22,7 +22,6 @@ import java.math.BigInteger
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
-
 
 class LoginViewModel(
     context: Context,
@@ -179,11 +178,11 @@ class LoginViewModel(
 
         }
     }
-}
+    @Throws(NoSuchAlgorithmException::class)
+    private fun String.md5(): String? {
+        val md5: MessageDigest = MessageDigest.getInstance("MD5")
+        val digest: ByteArray = md5.digest(this.toByteArray(StandardCharsets.UTF_8))
+        return java.lang.String.format("%032x", BigInteger(1, digest))
+    }
 
-@Throws(NoSuchAlgorithmException::class)
-private fun String.md5(): String? {
-    val md5: MessageDigest = MessageDigest.getInstance("MD5")
-    val digest: ByteArray = md5.digest(this.toByteArray(StandardCharsets.UTF_8))
-    return java.lang.String.format("%032x", BigInteger(1, digest))
 }

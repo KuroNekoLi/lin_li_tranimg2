@@ -45,10 +45,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
-import com.example.lin_li_tranimg.LoginViewModel
-import com.example.lin_li_tranimg.MainActivity.Companion.FORGET_PASSWORD_SCREEN
-import com.example.lin_li_tranimg.MainActivity.Companion.GUEST_SCREEN
-import com.example.lin_li_tranimg.MainActivity.Companion.REGISTER_SCREEN
+import com.example.lin_li_tranimg.presentation.viewmodel.LoginViewModel
+import com.example.lin_li_tranimg.presentation.activity.MainActivity.Companion.FORGET_PASSWORD_SCREEN
+import com.example.lin_li_tranimg.presentation.activity.MainActivity.Companion.GUEST_SCREEN
+import com.example.lin_li_tranimg.presentation.activity.MainActivity.Companion.REGISTER_SCREEN
 import com.example.lin_li_tranimg.R
 import com.example.lin_li_tranimg.ui.theme.ButtonStyles
 import com.example.lin_li_tranimg.ui.theme.DialogBackgroundColor
@@ -79,7 +79,10 @@ fun LoginScreen(
                 }
 
                 LoginViewModel.LoginEvent.ShowFailure -> {
-                    { LoginFailedDialog(onDismiss = { showDialog = false }) }
+                    {
+                        LoginFailedDialog(onDismiss = { showDialog = false })
+                        //跳轉到另一個
+                    }
                 }
             }
         }

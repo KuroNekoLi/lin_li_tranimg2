@@ -1,7 +1,7 @@
 package com.example.lin_li_tranimg.presentation.di
 
 import com.cmoney.backend2.base.model.manager.GlobalBackend2Manager
-import com.example.lin_li_tranimg.LoginViewModel
+import com.example.lin_li_tranimg.presentation.viewmodel.LoginViewModel
 import com.example.lin_li_tranimg.domain.LoginRepository
 import com.example.lin_li_tranimg.domain.LoginRepositoryImpl
 import com.google.androidbrowserhelper.BuildConfig

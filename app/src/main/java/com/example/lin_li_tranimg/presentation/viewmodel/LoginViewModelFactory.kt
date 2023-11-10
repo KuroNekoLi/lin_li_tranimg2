@@ -1,4 +1,4 @@
-package com.example.lin_li_tranimg
+package com.example.lin_li_tranimg.presentation.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
