@@ -5,11 +5,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.lin_li_tranimg.presentation.viewmodel.LoginViewModel
 import com.example.lin_li_tranimg.presentation.activity.MainActivity.Companion.FORGET_PASSWORD_SCREEN
 import com.example.lin_li_tranimg.presentation.activity.MainActivity.Companion.GUEST_SCREEN
 import com.example.lin_li_tranimg.presentation.activity.MainActivity.Companion.LOGIN_SCREEN
 import com.example.lin_li_tranimg.presentation.activity.MainActivity.Companion.REGISTER_SCREEN
+import com.example.lin_li_tranimg.presentation.activity.MainActivity.Companion.STOCK_SCREEN
+import com.example.lin_li_tranimg.presentation.viewmodel.LoginViewModel
 
 @Composable
 fun AppNavHost(
@@ -17,7 +18,7 @@ fun AppNavHost(
     viewModel: LoginViewModel
 ) {
     NavHost(navController = navController, startDestination = LOGIN_SCREEN) {
-        composable(route = "login_screen") {
+        composable(route = LOGIN_SCREEN) {
             LoginScreen(viewModel = viewModel, navController = navController)
         }
         composable(route = REGISTER_SCREEN) {
@@ -28,6 +29,9 @@ fun AppNavHost(
         }
         composable(route = FORGET_PASSWORD_SCREEN) {
             ForgetPasswordScreen(string = "忘記密碼畫面", navController = navController)
+        }
+        composable(route = STOCK_SCREEN) {
+            ForgetPasswordScreen(string = "主畫面", navController = navController)
         }
     }
 }

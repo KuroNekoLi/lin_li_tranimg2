@@ -36,34 +36,23 @@ class PreferencesManager(private val context: Context) {
             preferences[ACCOUNT_KEY]
         }
 
-    // 向Preferences DataStore寫入數據
     suspend fun updateAccountVisibility(isVisible: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[ACCOUNT_VISIBLE_KEY] = isVisible
         }
     }
 
-    suspend fun savePassword(password: String) {
+    suspend fun saveUserData(account: String, password: String) {
         context.dataStore.edit { preferences ->
+            preferences[ACCOUNT_KEY] = account
             preferences[PASSWORD_KEY] = password
         }
     }
 
-    suspend fun clearPassword() {
-        context.dataStore.edit { preferences ->
-            preferences[PASSWORD_KEY] = ""
-        }
-    }
-
-    suspend fun saveAccount(account: String) {
-        context.dataStore.edit { preferences ->
-            preferences[ACCOUNT_KEY] = account
-        }
-    }
-
-    suspend fun clearAccount() {
+    suspend fun clearUserData() {
         context.dataStore.edit { preferences ->
             preferences[ACCOUNT_KEY] = ""
+            preferences[PASSWORD_KEY] = ""
         }
     }
 }

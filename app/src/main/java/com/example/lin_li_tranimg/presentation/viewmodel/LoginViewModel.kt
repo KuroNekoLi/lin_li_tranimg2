@@ -1,7 +1,5 @@
 package com.example.lin_li_tranimg.presentation.viewmodel
 
-import PreferencesManager
-import android.content.Context
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -24,14 +22,10 @@ import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
 class LoginViewModel(
-    context: Context,
     private val loginRepository: LoginRepository,
     private val identityProviderWeb: IdentityProviderWeb
 ) : ViewModel() {
 
-
-    // 創建PreferencesManager的實例
-    private val preferencesManager = PreferencesManager(context)
     private val _accountState = MutableStateFlow(TextFieldValue(""))
     private val _passwordState = MutableStateFlow(TextFieldValue(""))
     val accountState: StateFlow<TextFieldValue> = _accountState
@@ -74,7 +68,7 @@ class LoginViewModel(
         //從DataStore讀取帳號的可見狀態並更新_isPasswordVisible
         viewModelScope.launch(Dispatchers.IO) {
             //記憶的密碼
-            preferencesManager.passwordFlow.collect { savedPassword ->
+            loginRepository.savedPasswordFlow().collect { savedPassword ->
                 if (!savedPassword.isNullOrEmpty()) {
                     _passwordState.value = TextFieldValue(savedPassword)
                     _rememberPasswordSwitchState.value = true
@@ -83,7 +77,7 @@ class LoginViewModel(
         }
         viewModelScope.launch(Dispatchers.IO) {
             //記憶的帳號
-            preferencesManager.accountFlow.collect { savedAccount ->
+            loginRepository.savedAccountFlow().collect { savedAccount ->
                 if (!savedAccount.isNullOrEmpty()) {
                     _accountState.value = TextFieldValue(savedAccount)
                     _rememberPasswordSwitchState.value = true
@@ -93,7 +87,7 @@ class LoginViewModel(
 
         viewModelScope.launch(Dispatchers.IO) {
             //眼睛可不可見
-            preferencesManager.isAccountVisible.collect { isVisible ->
+            loginRepository.isAccountVisibleFlow().collect { isVisible ->
                 _isAccountVisible.value = isVisible
             }
         }
@@ -117,7 +111,7 @@ class LoginViewModel(
             val newVisibility = !_isAccountVisible.value
             _isAccountVisible.value = newVisibility
             // 更新DataStore中的可見狀態
-            preferencesManager.updateAccountVisibility(newVisibility)
+            loginRepository.updateAccountVisibility(newVisibility)
         }
     }
 
@@ -131,11 +125,9 @@ class LoginViewModel(
     fun rememberPassWord(remember: Boolean) {
         viewModelScope.launch {
             if (remember) {
-                preferencesManager.saveAccount(_accountState.value.text)
-                preferencesManager.savePassword(_passwordState.value.text)
+                loginRepository.saveUserData(_accountState.value.text, _passwordState.value.text)
             } else {
-                preferencesManager.clearAccount()
-                preferencesManager.clearPassword()
+                loginRepository.clearUserData()
             }
         }
     }
@@ -178,6 +170,7 @@ class LoginViewModel(
 
         }
     }
+
     @Throws(NoSuchAlgorithmException::class)
     private fun String.md5(): String? {
         val md5: MessageDigest = MessageDigest.getInstance("MD5")

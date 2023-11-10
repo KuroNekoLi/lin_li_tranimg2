@@ -23,6 +23,7 @@ class MainActivity : ComponentActivity() {
         const val REGISTER_SCREEN = "register_screen"
         const val GUEST_SCREEN = "guest_screen"
         const val FORGET_PASSWORD_SCREEN = "forget_password_screen"
+        const val STOCK_SCREEN = "stock_screen"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
