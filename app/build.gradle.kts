@@ -51,18 +51,16 @@ android {
 }
 
 dependencies {
+    val lifecycleVersion = "2.6.2"
     implementation("androidx.compose.ui:ui-text-android:1.5.4")
-    val kotlinVersion = "ktx:2.6.2"
     // DataStore
     implementation ("androidx.datastore:datastore-preferences:1.0.0")
-    // ViewModel
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-$kotlinVersion")
-    // LiveData
-    implementation ("androidx.lifecycle:lifecycle-livedata-$kotlinVersion")
-    // Lifecycle runtime for collecting flows in the ViewModel
-    implementation ("androidx.lifecycle:lifecycle-runtime-$kotlinVersion")
+    // ViewModel, LiveData, Lifecycle runtime
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     // Compose ViewModel
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     //Nav Compose
     implementation("androidx.navigation:navigation-compose:2.5.3")
     //backend2
@@ -71,8 +69,6 @@ dependencies {
     implementation("com.cmoney.logdatarecorder:logdatarecorder-domain:5.5.0")
     //Koin
     implementation ("io.insert-koin:koin-androidx-compose:3.5.0")
-    // If you're using navigation-compose, you might need to add this as well
-    implementation ("androidx.navigation:navigation-compose:2.5.3") // Use the latest version
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.activity:activity-compose:1.7.0")
