@@ -1,4 +1,4 @@
-package com.example.lin_li_tranimg.presentation.activity
+package com.example.lin_li_tranimg
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.example.lin_li_tranimg.presentation.compose.AppNavHost
 import com.example.lin_li_tranimg.presentation.viewmodel.LoginViewModel
 import com.example.lin_li_tranimg.ui.theme.Lin_li_tranimgTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -19,11 +18,6 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val TAG = "LinLi"
-        const val LOGIN_SCREEN = "login_screen"
-        const val REGISTER_SCREEN = "register_screen"
-        const val GUEST_SCREEN = "guest_screen"
-        const val FORGET_PASSWORD_SCREEN = "forget_password_screen"
-        const val STOCK_SCREEN = "stock_screen"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,7 +30,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavHost(viewModel = loginViewModel)
+                    AppNavHost()
                 }
             }
         }

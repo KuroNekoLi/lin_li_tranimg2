@@ -41,62 +41,49 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.navigation.NavController
 import com.example.lin_li_tranimg.R
 import com.example.lin_li_tranimg.presentation.LoginEvent
-import com.example.lin_li_tranimg.presentation.UIEvent
-import com.example.lin_li_tranimg.presentation.activity.MainActivity.Companion.FORGET_PASSWORD_SCREEN
-import com.example.lin_li_tranimg.presentation.activity.MainActivity.Companion.GUEST_SCREEN
-import com.example.lin_li_tranimg.presentation.activity.MainActivity.Companion.REGISTER_SCREEN
-import com.example.lin_li_tranimg.presentation.activity.MainActivity.Companion.STOCK_SCREEN
 import com.example.lin_li_tranimg.presentation.viewmodel.LoginViewModel
 import com.example.lin_li_tranimg.ui.theme.ButtonStyles
 import com.example.lin_li_tranimg.ui.theme.DialogBackgroundColor
 import com.example.lin_li_tranimg.ui.theme.Yellow
 import com.example.lin_li_tranimg.util.EmailVisualTransformation
+import org.koin.androidx.compose.getViewModel
 
 @Composable
 fun LoginScreen(
-    navController: NavController,
-    modifier: Modifier = Modifier,
-    viewModel: LoginViewModel
+    onRegister: () -> Unit,
+    onLogin: () -> Unit,
+    onForgetPassword: () -> Unit,
+    onGuest: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
+    val viewModel: LoginViewModel = getViewModel()
+    val loginScreenState = viewModel.loginScreenState.value
     var currentDialog by remember { mutableStateOf<@Composable (() -> Unit)?>(null) }
 
-    LaunchedEffect(key1 = true) {
-        viewModel.uiEventFlow.collect { event ->
-            when (event) {
-                is UIEvent.NavigateToHomeScreen -> {
-                    navController.navigate(STOCK_SCREEN)
-                }
 
-                is UIEvent.NavigateToRegisterScreen -> {
-                    navController.navigate(REGISTER_SCREEN)
-                }
+    // 監聽 isLoading, isSuccess, 和 isError 的變化
+    LaunchedEffect(
+        loginScreenState.isLoading,
+        loginScreenState.isSuccess,
+        loginScreenState.isError
+    ) {
+        when {
+            loginScreenState.isLoading == true -> {
+                currentDialog = { LoginLoadingDialog {} }
+            }
 
-                is UIEvent.NavigateToForgetPasswordScreen -> {
-                    navController.navigate(FORGET_PASSWORD_SCREEN)
-                }
+            loginScreenState.isSuccess == true -> {
+                currentDialog = { LoginSuccessDialog {} }
+                onLogin()
+            }
 
-                is UIEvent.NavigateToGuestScreen -> {
-                    navController.navigate(GUEST_SCREEN)
-                }
-
-                is UIEvent.ShowErrorDialog -> {
-                    val errorText = viewModel.loginScreenState.value.errorText
-                    currentDialog = {
-                        LoginFailedDialog(errorText) {
-                            currentDialog = null
-                        }
+            loginScreenState.isError != null -> {
+                currentDialog = {
+                    LoginFailedDialog(errorMessage = loginScreenState.isError) {
+                        currentDialog = null
                     }
-                }
-
-                is UIEvent.ShowSuccessDialog -> {
-                    currentDialog = { LoginSuccessDialog {} }
-                }
-
-                is UIEvent.ShowLoadingDialog -> {
-                    currentDialog = { LoginLoadingDialog {} }
                 }
             }
         }
@@ -121,10 +108,15 @@ fun LoginScreen(
         ) {
             AccountField(viewModel)
             PasswordField(viewModel)
-            AboveLoginButtonRow(viewModel, navController)
-            LoginButton(viewModel, onClick = {
-                viewModel.onEvent(LoginEvent.LoginButtonClicked)
-            })
+            AboveLoginButtonRow(
+                onForgetPassword = onForgetPassword,
+                onRegister = onRegister,
+                onGuest = onGuest,
+                isSwitchBarChecked = viewModel.loginScreenState.value.isRememberSwitchBarOn,
+                onSwitchBarChecked = { viewModel.onEvent(LoginEvent.RememberBarSwitched) }
+
+            )
+            LoginButton(viewModel, onClick = { viewModel.onEvent(LoginEvent.LoginButtonClicked) })
             // 顯示登入狀態的對話框
             currentDialog?.invoke()
         }
@@ -133,11 +125,13 @@ fun LoginScreen(
 }
 
 @Composable
-fun RememberPasswordSwitch(viewModel: LoginViewModel) {
-    val isRememberSwitchBarOn = viewModel.loginScreenState.value.isRememberSwitchBarOn
+fun RememberPasswordSwitch(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
     Switch(
-        checked = isRememberSwitchBarOn,
-        onCheckedChange = { viewModel.onEvent(LoginEvent.RememberBarSwitched) }
+        checked = checked,
+        onCheckedChange = onCheckedChange
     )
 }
 
@@ -240,45 +234,52 @@ fun LoginButton(viewModel: LoginViewModel, onClick: () -> Unit) {
 
 @Composable
 fun AboveLoginButtonRow(
-    viewModel: LoginViewModel,
-    navController: NavController
+    onForgetPassword: () -> Unit,
+    onRegister: () -> Unit,
+    onGuest: () -> Unit,
+    isSwitchBarChecked: Boolean,
+    onSwitchBarChecked: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
         Text(
-            modifier = Modifier.clickable {
-                navController.navigate(FORGET_PASSWORD_SCREEN)
+            modifier = modifier.clickable {
+                onForgetPassword()
             },
             text = "忘記密碼",
             color = Color.White,
         )
-        Spacer(modifier = Modifier.width(10.dp))
+        Spacer(modifier = modifier.width(10.dp))
         Text(
-            modifier = Modifier.clickable {
-                navController.navigate(REGISTER_SCREEN)
+            modifier = modifier.clickable {
+                onRegister()
             },
             text = "註冊",
             color = Color.White
         )
-        Spacer(modifier = Modifier.width(10.dp))
+        Spacer(modifier = modifier.width(10.dp))
         Text(
-            modifier = Modifier.clickable {
-                navController.navigate(GUEST_SCREEN)
+            modifier = modifier.clickable {
+                onGuest()
             },
             text = "訪客登入",
             color = Color.White
         )
-        Spacer(Modifier.weight(1f))
+        Spacer(modifier.weight(1f))
         Text(
             text = "記住密碼",
             color = Color.White
         )
-        RememberPasswordSwitch(viewModel)
+        RememberPasswordSwitch(
+            checked = isSwitchBarChecked,
+            onCheckedChange = onSwitchBarChecked
+        )
     }
 }
 

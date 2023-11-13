@@ -38,6 +38,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.3"
@@ -68,6 +69,8 @@ dependencies {
     implementation("com.cmoney.backend2:backend2:5.58.0")
     implementation("com.cmoney.logdatarecorder:logdatarecorder-data:5.5.0")
     implementation("com.cmoney.logdatarecorder:logdatarecorder-domain:5.5.0")
+    //Koin
+    implementation ("io.insert-koin:koin-androidx-compose:3.5.0")
     // If you're using navigation-compose, you might need to add this as well
     implementation ("androidx.navigation:navigation-compose:2.5.3") // Use the latest version
     implementation("androidx.core:core-ktx:1.9.0")

@@ -6,25 +6,15 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cmoney.backend2.base.model.exception.ServerException
-import com.cmoney.backend2.identityprovider.service.IdentityProviderWeb
-import com.cmoney.backend2.identityprovider.service.api.gettoken.GetTokenResponseBody
 import com.example.lin_li_tranimg.domain.LoginRepository
 import com.example.lin_li_tranimg.presentation.LoginEvent
 import com.example.lin_li_tranimg.presentation.LoginScreenState
-import com.example.lin_li_tranimg.presentation.UIEvent
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.math.BigInteger
-import java.nio.charset.StandardCharsets
-import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 
 class LoginViewModel(
-    private val loginRepository: LoginRepository,
-    private val identityProviderWeb: IdentityProviderWeb
+    private val loginRepository: LoginRepository
 ) : ViewModel() {
 
     private val _loginScreenState = mutableStateOf(
@@ -34,14 +24,13 @@ class LoginViewModel(
             isEyeOpened = true,
             isRememberSwitchBarOn = false,
             isLoginButtonEnabled = false,
-            errorText = ""
+            isError = null,
+            isSuccess = null,
+            isLoading = null
         )
     )
 
     val loginScreenState: State<LoginScreenState> = _loginScreenState
-
-    private val _uiEventFlow = MutableSharedFlow<UIEvent>()
-    val uiEventFlow = _uiEventFlow.asSharedFlow()
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -89,54 +78,34 @@ class LoginViewModel(
         return password.text.length >= 4
     }
 
-    private fun login(account: String, password: String) {
-        val md5edPassword = try {
-            password.md5().orEmpty()
-        } catch (e: Exception) {
-            ""
-        }
-        if (account.isEmpty() || md5edPassword.isEmpty()) {
-            return
-        }
+    fun login() {
+        val account = _loginScreenState.value.accountText
+        val password = _loginScreenState.value.passwordText
         viewModelScope.launch {
-            _uiEventFlow.emit(
-                UIEvent.ShowLoadingDialog
+            _loginScreenState.value = loginScreenState.value.copy(
+                isLoading = true
             )
-
-            val result: Result<GetTokenResponseBody> = identityProviderWeb.loginByEmail(
-                account = account,
-                hashedPassword = md5edPassword,
-            )
+            val result = loginRepository.loginByEmail(account, password)
 
             if (result.isSuccess) {
-                _uiEventFlow.emit(
-                    UIEvent.ShowSuccessDialog
-                )
-
-                _uiEventFlow.emit(
-                    UIEvent.NavigateToHomeScreen
+                _loginScreenState.value = loginScreenState.value.copy(
+                    isLoading = null,
+                    isSuccess = true
                 )
             }
 
             if (result.isFailure) {
                 val errorMessage =
                     (result.exceptionOrNull() as? ServerException)?.message ?: "登入失敗"
-                _uiEventFlow.emit(
-                    UIEvent.ShowErrorDialog
-                )
                 _loginScreenState.value = loginScreenState.value.copy(
-                    errorText = errorMessage
+                    isLoading = null,
+                    isSuccess = null,
+                    isError = errorMessage
                 )
             }
         }
     }
 
-    @Throws(NoSuchAlgorithmException::class)
-    private fun String.md5(): String? {
-        val md5: MessageDigest = MessageDigest.getInstance("MD5")
-        val digest: ByteArray = md5.digest(this.toByteArray(StandardCharsets.UTF_8))
-        return java.lang.String.format("%032x", BigInteger(1, digest))
-    }
 
     fun onEvent(event: LoginEvent) {
         when (event) {
@@ -178,30 +147,6 @@ class LoginViewModel(
                 )
             }
 
-            is LoginEvent.ForgetPassWordClicked -> {
-                viewModelScope.launch {
-                    _uiEventFlow.emit(
-                        UIEvent.NavigateToForgetPasswordScreen
-                    )
-                }
-            }
-
-            is LoginEvent.GuestClicked -> {
-                viewModelScope.launch {
-                    _uiEventFlow.emit(
-                        UIEvent.NavigateToGuestScreen
-                    )
-                }
-            }
-
-            is LoginEvent.RegisterClicked -> {
-                viewModelScope.launch {
-                    _uiEventFlow.emit(
-                        UIEvent.NavigateToRegisterScreen
-                    )
-                }
-            }
-
             is LoginEvent.LoginButtonClicked -> {
                 viewModelScope.launch {
                     if (loginScreenState.value.isRememberSwitchBarOn) {
@@ -213,7 +158,7 @@ class LoginViewModel(
                     } else {
                         loginRepository.clearUserData()
                     }
-                    login(loginScreenState.value.accountText, loginScreenState.value.passwordText)
+                    login()
                 }
             }
         }

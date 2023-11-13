@@ -1,10 +1,12 @@
 package com.example.lin_li_tranimg.presentation
 
 data class LoginScreenState(
-    var accountText: String = "",
-    var passwordText: String = "",
-    var isEyeOpened: Boolean = true,
-    var isRememberSwitchBarOn: Boolean = false,
-    var errorText: String = "",
-    var isLoginButtonEnabled: Boolean = false
+    val accountText: String = "",
+    val passwordText: String = "",
+    val isEyeOpened: Boolean = true,
+    val isRememberSwitchBarOn: Boolean = false,
+    val isError: String?,
+    val isLoginButtonEnabled: Boolean = false,
+    val isSuccess: Boolean?,
+    val isLoading: Boolean?
 )

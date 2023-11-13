@@ -2,10 +2,10 @@ package com.example.lin_li_tranimg.presentation.di
 
 import PreferencesManager
 import com.cmoney.backend2.base.model.manager.GlobalBackend2Manager
+import com.example.lin_li_tranimg.BuildConfig
 import com.example.lin_li_tranimg.domain.LoginRepository
 import com.example.lin_li_tranimg.domain.LoginRepositoryImpl
 import com.example.lin_li_tranimg.presentation.viewmodel.LoginViewModel
-import com.google.androidbrowserhelper.BuildConfig
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -24,12 +24,16 @@ val appModule = module {
         }
     }
     single { PreferencesManager(context = androidContext()) }
-    single<LoginRepository> { LoginRepositoryImpl(get()) }
+    single<LoginRepository> {
+        LoginRepositoryImpl(
+            preferencesManager = get(),
+            identityProviderWeb = get()
+        )
+    }
 
     viewModel {
         LoginViewModel(
-            loginRepository = get(),
-            identityProviderWeb = get()
+            loginRepository = get()
         )
     }
 }
