@@ -9,7 +9,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.lin_li_tranimg.presentation.compose.ForgetPasswordScreen
 import com.example.lin_li_tranimg.presentation.compose.GuestScreen
-import com.example.lin_li_tranimg.presentation.compose.HomeScreen
 import com.example.lin_li_tranimg.presentation.compose.LoginScreen
 import com.example.lin_li_tranimg.presentation.compose.RegisterScreen
 
@@ -29,12 +28,6 @@ fun AppNavHost(
         startDestination = startDestination,
         modifier = modifier
     ) {
-        composable(AppDestinations.HOME_ROUTE) {
-            HomeScreen(
-                onLogin = { navActions.navigateToLogin() },
-                onRegister = { navActions.navigateToRegister() }
-            )
-        }
         composable(AppDestinations.LOGIN_ROUTE) {
             LoginScreen(
                 onLogin = { navActions.navigateToStock() },
