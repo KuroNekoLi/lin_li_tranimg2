@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">lin_li_tranimg</string>
+    <string name="account_label">\"CMoney帳號 (手機號碼或email)\"</string>
+    <string name="password_label">\"密碼\"</string>
 </resources>

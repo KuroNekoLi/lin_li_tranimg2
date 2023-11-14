@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -49,6 +50,7 @@ import com.example.lin_li_tranimg.ui.theme.DialogBackgroundColor
 import com.example.lin_li_tranimg.ui.theme.Yellow
 import com.example.lin_li_tranimg.util.EmailVisualTransformation
 import org.koin.androidx.compose.getViewModel
+
 /**
  * 登入頁面的 Composable 函數。
  * 提供登入界面和相關的用戶互動功能。
@@ -69,7 +71,7 @@ fun LoginScreen(
 ) {
     val viewModel: LoginViewModel = getViewModel()
     val loginScreenState = viewModel.loginScreenState.value
-    var currentDialog by remember { mutableStateOf<@Composable (() -> Unit)?>(null) }
+    var currentDialog by remember { mutableStateOf<(@Composable () -> Unit)>({}) }
 
 
     // 監聽 isLoading, isSuccess, 和 isError 的變化
@@ -91,7 +93,7 @@ fun LoginScreen(
             loginScreenState.isError != null -> {
                 currentDialog = {
                     LoginFailedDialog(errorMessage = loginScreenState.isError) {
-                        currentDialog = null
+                        currentDialog = {}
                     }
                 }
             }
@@ -115,26 +117,36 @@ fun LoginScreen(
                 .align(Alignment.Center)
                 .padding(top = 150.dp)
         ) {
-            AccountField(viewModel)
-            PasswordField(viewModel)
+            AccountField(
+                account = loginScreenState.accountText,
+                onAccountChange = { viewModel.onEvent(LoginEvent.AccountTextEntered(it)) },
+                onIconEyeClick = { viewModel.onEvent(LoginEvent.IconEyeClicked) },
+                isAccountVisible = loginScreenState.isEyeOpened
+            )
+            PasswordField(
+                password = loginScreenState.passwordText,
+                onPasswordChange = { viewModel.onEvent(LoginEvent.PasswordTextEntered(it)) }
+            )
             AboveLoginButtonRow(
                 onForgetPassword = onForgetPassword,
                 onRegister = onRegister,
                 onGuest = onGuest,
-                isSwitchBarChecked = viewModel.loginScreenState.value.isRememberSwitchBarOn,
+                isSwitchBarChecked = loginScreenState.isRememberSwitchBarOn,
                 onSwitchBarChecked = { viewModel.onEvent(LoginEvent.RememberBarSwitched) }
 
             )
-            LoginButton(viewModel, onClick = { viewModel.onEvent(LoginEvent.LoginButtonClicked) })
+            LoginButton(
+                loginScreenState.isLoginButtonEnabled,
+                onClick = { viewModel.onEvent(LoginEvent.LoginButtonClicked) })
             // 顯示登入狀態的對話框
-            currentDialog?.invoke()
+            currentDialog.invoke()
         }
     }
 
 }
 
 @Composable
-private fun RememberPasswordSwitch(
+private fun AutoLoginSwitch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
@@ -146,18 +158,19 @@ private fun RememberPasswordSwitch(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AccountField(viewModel: LoginViewModel) {
-    val account = viewModel.loginScreenState.value.accountText
-    val isPasswordVisible = viewModel.loginScreenState.value.isEyeOpened
-
+private fun AccountField(
+    account: String,
+    onAccountChange: (String) -> Unit,
+    onIconEyeClick: () -> Unit,
+    isAccountVisible: Boolean,
+    modifier: Modifier = Modifier
+) {
     OutlinedTextField(
         value = account,
-        onValueChange = { newText ->
-            viewModel.onEvent(LoginEvent.AccountTextEntered(newText))
-        },
+        onValueChange = onAccountChange,
         label = {
             Text(
-                text = "CMoney帳號 (手機號碼或email)",
+                text = stringResource(R.string.account_label),
                 fontSize = MaterialTheme.typography.bodyMedium.fontSize
             )
         },
@@ -165,26 +178,27 @@ private fun AccountField(viewModel: LoginViewModel) {
             Icon(
                 painter = painterResource(id = R.drawable.icon_login_person),
                 contentDescription = "帳號圖示",
-                Modifier.size(24.dp)
+                modifier.size(24.dp)
             )
         },
         trailingIcon = {
-            IconButton(onClick = { viewModel.onEvent(LoginEvent.IconEyeClicked) }) {
+            IconButton(onClick = onIconEyeClick) {
                 Icon(
                     painter = painterResource(
-                        id = if (isPasswordVisible) R.drawable.icon_open_eye else R.drawable.icon_close_eye
+                        id = if (isAccountVisible) R.drawable.icon_open_eye else R.drawable.icon_close_eye
                     ),
-                    contentDescription = if (isPasswordVisible) "隱藏帳號" else "顯示帳號",
-                    Modifier.size(24.dp)
+                    contentDescription = if (isAccountVisible) "隱藏帳號" else "顯示帳號",
+                    modifier.size(24.dp)
                 )
             }
         },
-        visualTransformation = if (isPasswordVisible) VisualTransformation.None else EmailVisualTransformation(),
+        visualTransformation = if (isAccountVisible) VisualTransformation.None else EmailVisualTransformation(),
         colors = TextFieldDefaults.outlinedTextFieldColors(
             unfocusedLabelColor = Color.Gray,
             textColor = Color.Black
         ),
-        modifier = Modifier
+        singleLine = true,
+        modifier = modifier
             .fillMaxWidth()
             .padding(16.dp)
             .background(Color.White)
@@ -193,16 +207,17 @@ private fun AccountField(viewModel: LoginViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PasswordField(viewModel: LoginViewModel) {
-    val password = viewModel.loginScreenState.value.passwordText
+private fun PasswordField(
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     OutlinedTextField(
         value = password,
-        onValueChange = { newText ->
-            viewModel.onEvent(LoginEvent.PasswordTextEntered(newText))
-        },
+        onValueChange = onPasswordChange,
         label = {
             Text(
-                text = "密碼",
+                text = stringResource(R.string.password_label),
                 fontSize = MaterialTheme.typography.bodyMedium.fontSize
             )
         },
@@ -210,7 +225,7 @@ private fun PasswordField(viewModel: LoginViewModel) {
             Icon(
                 painter = painterResource(id = R.drawable.icon_password),
                 contentDescription = "帳號圖示",
-                Modifier.size(24.dp)
+                modifier.size(24.dp)
             )
         },
         visualTransformation = PasswordVisualTransformation(),
@@ -219,7 +234,8 @@ private fun PasswordField(viewModel: LoginViewModel) {
             unfocusedLabelColor = Color.Gray,
             textColor = Color.Black
         ),
-        modifier = Modifier
+        singleLine = true,
+        modifier = modifier
             .fillMaxWidth()
             .padding(16.dp, 0.dp)
             .background(Color.White)
@@ -227,13 +243,16 @@ private fun PasswordField(viewModel: LoginViewModel) {
 }
 
 @Composable
-private fun LoginButton(viewModel: LoginViewModel, onClick: () -> Unit) {
-    val isButtonEnabled = viewModel.loginScreenState.value.isLoginButtonEnabled
+private fun LoginButton(
+    isButtonEnabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Button(
         onClick = onClick,
         enabled = isButtonEnabled,
         colors = ButtonStyles.defaultButtonColors(),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
@@ -285,7 +304,7 @@ private fun AboveLoginButtonRow(
             text = "記住密碼",
             color = Color.White
         )
-        RememberPasswordSwitch(
+        AutoLoginSwitch(
             checked = isSwitchBarChecked,
             onCheckedChange = onSwitchBarChecked
         )
@@ -293,17 +312,20 @@ private fun AboveLoginButtonRow(
 }
 
 @Composable
-private fun LoginLoadingDialog(onDismiss: () -> Unit) {
+private fun LoginLoadingDialog(
+    modifier: Modifier = Modifier,
+    onDismiss: () -> Unit
+) {
     Dialog(onDismissRequest = onDismiss) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .size(299.dp, 144.dp)
                 .background(DialogBackgroundColor),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             CircularProgressIndicator(
-                modifier = Modifier
+                modifier = modifier
                     .width(64.dp),
                 color = Yellow
             )
@@ -313,10 +335,13 @@ private fun LoginLoadingDialog(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun LoginSuccessDialog(onDismiss: () -> Unit) {
+private fun LoginSuccessDialog(
+    modifier: Modifier = Modifier,
+    onDismiss: () -> Unit
+) {
     Dialog(onDismissRequest = onDismiss) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .size(299.dp, 144.dp)
                 .background(DialogBackgroundColor),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -326,7 +351,7 @@ private fun LoginSuccessDialog(onDismiss: () -> Unit) {
             Icon(
                 painter = painterResource(id = R.drawable.icon_login_success),
                 contentDescription = "登入成功",
-                Modifier.size(64.dp),
+                modifier.size(64.dp),
                 tint = Yellow
             )
         }
@@ -334,10 +359,14 @@ private fun LoginSuccessDialog(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun LoginFailedDialog(errorMessage: String, onDismiss: () -> Unit) {
+private fun LoginFailedDialog(
+    modifier: Modifier = Modifier,
+    errorMessage: String,
+    onDismiss: () -> Unit
+) {
     Dialog(onDismissRequest = onDismiss) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .size(299.dp, 178.dp)
                 .background(DialogBackgroundColor)
                 .clickable(
@@ -354,7 +383,7 @@ private fun LoginFailedDialog(errorMessage: String, onDismiss: () -> Unit) {
             Icon(
                 painter = painterResource(id = R.drawable.icon_login_fail),
                 contentDescription = "登入失敗",
-                Modifier.size(64.dp),
+                modifier.size(64.dp),
                 tint = Yellow
             )
             LoginTextBody(string = errorMessage)
