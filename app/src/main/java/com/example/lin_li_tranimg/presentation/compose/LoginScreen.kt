@@ -49,7 +49,16 @@ import com.example.lin_li_tranimg.ui.theme.DialogBackgroundColor
 import com.example.lin_li_tranimg.ui.theme.Yellow
 import com.example.lin_li_tranimg.util.EmailVisualTransformation
 import org.koin.androidx.compose.getViewModel
-
+/**
+ * 登入頁面的 Composable 函數。
+ * 提供登入界面和相關的用戶互動功能。
+ *
+ * @param onRegister 當用戶點擊註冊時的回調。
+ * @param onLogin 當用戶成功登入時的回調。
+ * @param onForgetPassword 當用戶點擊忘記密碼時的回調。
+ * @param onGuest 當用戶選擇訪客登入時的回調。
+ * @param modifier Composable 的修飾符。
+ */
 @Composable
 fun LoginScreen(
     onRegister: () -> Unit,
@@ -125,7 +134,7 @@ fun LoginScreen(
 }
 
 @Composable
-fun RememberPasswordSwitch(
+private fun RememberPasswordSwitch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
@@ -137,7 +146,7 @@ fun RememberPasswordSwitch(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AccountField(viewModel: LoginViewModel) {
+private fun AccountField(viewModel: LoginViewModel) {
     val account = viewModel.loginScreenState.value.accountText
     val isPasswordVisible = viewModel.loginScreenState.value.isEyeOpened
 
@@ -184,7 +193,7 @@ fun AccountField(viewModel: LoginViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasswordField(viewModel: LoginViewModel) {
+private fun PasswordField(viewModel: LoginViewModel) {
     val password = viewModel.loginScreenState.value.passwordText
     OutlinedTextField(
         value = password,
@@ -218,7 +227,7 @@ fun PasswordField(viewModel: LoginViewModel) {
 }
 
 @Composable
-fun LoginButton(viewModel: LoginViewModel, onClick: () -> Unit) {
+private fun LoginButton(viewModel: LoginViewModel, onClick: () -> Unit) {
     val isButtonEnabled = viewModel.loginScreenState.value.isLoginButtonEnabled
     Button(
         onClick = onClick,
@@ -233,7 +242,7 @@ fun LoginButton(viewModel: LoginViewModel, onClick: () -> Unit) {
 }
 
 @Composable
-fun AboveLoginButtonRow(
+private fun AboveLoginButtonRow(
     onForgetPassword: () -> Unit,
     onRegister: () -> Unit,
     onGuest: () -> Unit,
@@ -284,7 +293,7 @@ fun AboveLoginButtonRow(
 }
 
 @Composable
-fun LoginLoadingDialog(onDismiss: () -> Unit) {
+private fun LoginLoadingDialog(onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
@@ -304,7 +313,7 @@ fun LoginLoadingDialog(onDismiss: () -> Unit) {
 }
 
 @Composable
-fun LoginSuccessDialog(onDismiss: () -> Unit) {
+private fun LoginSuccessDialog(onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
@@ -325,7 +334,7 @@ fun LoginSuccessDialog(onDismiss: () -> Unit) {
 }
 
 @Composable
-fun LoginFailedDialog(errorMessage: String, onDismiss: () -> Unit) {
+private fun LoginFailedDialog(errorMessage: String, onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
@@ -354,7 +363,7 @@ fun LoginFailedDialog(errorMessage: String, onDismiss: () -> Unit) {
 }
 
 @Composable
-fun LoginTextHeader(string: String) {
+private fun LoginTextHeader(string: String) {
     Text(
         color = Color.White,
         fontSize = MaterialTheme.typography.headlineMedium.fontSize,
@@ -363,7 +372,7 @@ fun LoginTextHeader(string: String) {
 }
 
 @Composable
-fun LoginTextBody(string: String) {
+private fun LoginTextBody(string: String) {
     Text(
         color = Color.White,
         fontSize = MaterialTheme.typography.bodyMedium.fontSize,
