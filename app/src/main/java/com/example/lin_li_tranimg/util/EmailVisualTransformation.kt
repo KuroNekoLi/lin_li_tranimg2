@@ -4,6 +4,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+
 /**
  * 遮蔽使用者的電子郵件
  * 這個轉換保留了電子郵件的第一個和最後一個字符，並將 "@" 符號之前的其他字符替換為星號 (*)。

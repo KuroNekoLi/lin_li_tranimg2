@@ -116,18 +116,21 @@ fun LoginScreen(
                     viewModel.resetDialogTypeToNone()
                     onLogin()
                 }
+
                 is LoginDialogType.Error -> {
                     LoginFailedDialog(
                         errorMessage = loginScreenState.loginDialogType.message,
                         onDismiss = { viewModel.resetDialogTypeToNone() }
                     )
                 }
+
                 LoginDialogType.None -> {}
             }
         }
     }
 
 }
+
 @Composable
 private fun AutoLoginSwitch(
     checked: Boolean,

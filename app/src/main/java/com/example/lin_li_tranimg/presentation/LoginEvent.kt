@@ -15,14 +15,17 @@ sealed class LoginEvent {
      * @param password 用戶輸入的密碼。
      */
     data class PasswordTextEntered(val password: String) : LoginEvent()
+
     /**
      * 用戶點擊顯示/隱藏帳號圖示時觸發的事件。
      */
     object IconEyeClicked : LoginEvent()
+
     /**
      * 用戶切換記住帳密開關時觸發的事件。
      */
     object RememberBarSwitched : LoginEvent()
+
     /**
      * 用戶點擊登入按鈕時觸發的事件。
      */

@@ -82,10 +82,11 @@ class LoginViewModel(
                 _loginScreenState.value = loginScreenState.value.copy(
                     loginDialogType = LoginDialogType.Success
                 )
-            }else{
+            } else {
                 if (loginByEmailResult.isFailure) {
                     val errorMessage =
-                        (loginByEmailResult.exceptionOrNull() as? ServerException)?.message ?: "登入失敗"
+                        (loginByEmailResult.exceptionOrNull() as? ServerException)?.message
+                            ?: "登入失敗"
                     _loginScreenState.value = loginScreenState.value.copy(
                         loginDialogType = LoginDialogType.Error(errorMessage)
                     )
@@ -93,7 +94,8 @@ class LoginViewModel(
 
                 if (loginByCellPhoneResult.isFailure) {
                     val errorMessage =
-                        (loginByCellPhoneResult.exceptionOrNull() as? ServerException)?.message ?: "登入失敗"
+                        (loginByCellPhoneResult.exceptionOrNull() as? ServerException)?.message
+                            ?: "登入失敗"
                     _loginScreenState.value = loginScreenState.value.copy(
                         loginDialogType = LoginDialogType.Error(errorMessage)
                     )
