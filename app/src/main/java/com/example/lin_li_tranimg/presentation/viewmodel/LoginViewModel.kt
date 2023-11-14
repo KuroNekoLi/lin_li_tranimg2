@@ -10,6 +10,8 @@ import com.example.lin_li_tranimg.domain.LoginRepository
 import com.example.lin_li_tranimg.presentation.LoginEvent
 import com.example.lin_li_tranimg.presentation.LoginScreenState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -33,35 +35,24 @@ class LoginViewModel(
     val loginScreenState: State<LoginScreenState> = _loginScreenState
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
-            loginRepository.savedPasswordFlow().collect { savedPassword ->
-                if (!savedPassword.isNullOrEmpty()) {
-                    withContext(Dispatchers.Main) {
-                        _loginScreenState.value =
-                            _loginScreenState.value.copy(passwordText = savedPassword)
-                        updateLoginButtonState()
-                    }
-                }
-            }
-        }
-        viewModelScope.launch(Dispatchers.IO) {
-            loginRepository.savedAccountFlow().collect { savedAccount ->
-                if (!savedAccount.isNullOrEmpty()) {
-                    withContext(Dispatchers.Main) {
-                        _loginScreenState.value =
-                            _loginScreenState.value.copy(accountText = savedAccount)
-                        updateLoginButtonState()
-                    }
-                }
+        collectFlowAndSetState(loginRepository.savedPasswordFlow()) { savedPassword ->
+            if (!savedPassword.isNullOrEmpty()) {
+                _loginScreenState.value =
+                    _loginScreenState.value.copy(passwordText = savedPassword)
+                updateLoginButtonState()
             }
         }
 
-        viewModelScope.launch(Dispatchers.IO) {
-            loginRepository.isAccountVisibleFlow().collect { isVisible ->
-                withContext(Dispatchers.Main) {
-                    _loginScreenState.value = _loginScreenState.value.copy(isEyeOpened = isVisible)
-                }
+        collectFlowAndSetState(loginRepository.savedAccountFlow()) { savedAccount ->
+            if (!savedAccount.isNullOrEmpty()) {
+                _loginScreenState.value =
+                    _loginScreenState.value.copy(accountText = savedAccount)
+                updateLoginButtonState()
             }
+        }
+
+        collectFlowAndSetState(loginRepository.isAccountVisibleFlow()) { isVisible ->
+            _loginScreenState.value = _loginScreenState.value.copy(isEyeOpened = isVisible)
         }
     }
 
@@ -172,6 +163,19 @@ class LoginViewModel(
             isLoginButtonEnabled = isValidAccount && isValidPassword,
             isRememberSwitchBarOn = true
         )
+    }
+
+    private fun <T> collectFlowAndSetState(
+        flow: Flow<T>,
+        setState: (T) -> Unit
+    ) {
+        viewModelScope.launch {
+            flow.flowOn(Dispatchers.IO).collect { value ->
+                withContext(Dispatchers.Main) {
+                    setState(value)
+                }
+            }
+        }
     }
 }
 
