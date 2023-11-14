@@ -3,7 +3,6 @@ package com.example.lin_li_tranimg
 import androidx.navigation.NavHostController
 import com.example.lin_li_tranimg.AppScreens.FORGET_PASSWORD_SCREEN
 import com.example.lin_li_tranimg.AppScreens.GUEST_SCREEN
-import com.example.lin_li_tranimg.AppScreens.HOME_SCREEN
 import com.example.lin_li_tranimg.AppScreens.LOGIN_SCREEN
 import com.example.lin_li_tranimg.AppScreens.REGISTER_SCREEN
 import com.example.lin_li_tranimg.AppScreens.STOCK_SCREEN
@@ -12,7 +11,6 @@ import com.example.lin_li_tranimg.AppScreens.STOCK_SCREEN
  * Screens used in [AppDestinations]
  */
 private object AppScreens {
-    const val HOME_SCREEN = "home_screen"
     const val LOGIN_SCREEN = "login_screen"
     const val REGISTER_SCREEN = "register_screen"
     const val GUEST_SCREEN = "guest_screen"
@@ -24,7 +22,6 @@ private object AppScreens {
  * Destinations used in the [MainActivity]
  */
 object AppDestinations {
-    const val HOME_ROUTE = HOME_SCREEN
     const val LOGIN_ROUTE = LOGIN_SCREEN
     const val REGISTER_ROUTE = REGISTER_SCREEN
     const val GUEST_ROUTE = GUEST_SCREEN
@@ -36,10 +33,6 @@ object AppDestinations {
  * Models the navigation actions in the app.
  */
 class AppNavigationActions(private val navController: NavHostController) {
-    fun navigateToLogin() {
-        navController.navigate(LOGIN_SCREEN)
-    }
-
     fun navigateToRegister() {
         navController.navigate(REGISTER_SCREEN)
     }
