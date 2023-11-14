@@ -14,11 +14,6 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        LogDataRecorder.initialization(this) {
-            isEnable = true
-            appId = 99
-            platform = com.cmoney.domain_logdatarecorder.data.information.Platform.Android
-        }
         startKoin {
             if (BuildConfig.DEBUG) {
                 androidLogger()
@@ -30,6 +25,11 @@ class App : Application() {
                     appModule
                 )
             )
+        }
+        LogDataRecorder.initialization(this) {
+            isEnable = true
+            appId = 99
+            platform = com.cmoney.domain_logdatarecorder.data.information.Platform.Android
         }
     }
 }
