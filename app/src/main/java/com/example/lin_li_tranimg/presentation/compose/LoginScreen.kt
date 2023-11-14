@@ -72,32 +72,19 @@ fun LoginScreen(
 ) {
     val viewModel: LoginViewModel = getViewModel()
     val loginScreenState = viewModel.loginScreenState.value
-    var currentDialog by remember { mutableStateOf<(@Composable () -> Unit)>({}) }
+    var currentDialogType by remember { mutableStateOf(DialogType.None) }
 
 
-    // 監聽 isLoading, isSuccess, 和 isError 的變化
     LaunchedEffect(
         loginScreenState.isLoading,
         loginScreenState.isSuccess,
         loginScreenState.isError
     ) {
-        when {
-            loginScreenState.isLoading == true -> {
-                currentDialog = { LoginLoadingDialog {} }
-            }
-
-            loginScreenState.isSuccess == true -> {
-                currentDialog = { LoginSuccessDialog {} }
-                onLogin()
-            }
-
-            loginScreenState.isError != null -> {
-                currentDialog = {
-                    LoginFailedDialog(errorMessage = loginScreenState.isError) {
-                        currentDialog = {}
-                    }
-                }
-            }
+        currentDialogType = when {
+            loginScreenState.isLoading == true -> DialogType.Loading
+            loginScreenState.isSuccess == true -> DialogType.Success
+            loginScreenState.isError != null -> DialogType.Failed
+            else -> DialogType.None
         }
     }
 
@@ -140,7 +127,17 @@ fun LoginScreen(
                 loginScreenState.isLoginButtonEnabled,
                 onClick = { viewModel.onEvent(LoginEvent.LoginButtonClicked) })
             // 顯示登入狀態的對話框
-            currentDialog.invoke()
+            when (currentDialogType) {
+                DialogType.Loading -> LoginLoadingDialog {}
+                DialogType.Success -> {
+                    LoginSuccessDialog {}
+                    onLogin()
+                }
+                DialogType.Failed -> LoginFailedDialog(errorMessage = loginScreenState.isError!!) {
+                    currentDialogType = DialogType.None
+                }
+                DialogType.None -> {}
+            }
         }
     }
 
@@ -413,3 +410,6 @@ private fun LoginTextBody(string: String) {
     )
 }
 
+enum class DialogType {
+    None, Loading, Success, Failed
+}
