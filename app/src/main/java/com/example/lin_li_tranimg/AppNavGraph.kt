@@ -16,7 +16,6 @@ import com.example.lin_li_tranimg.presentation.compose.RegisterScreen
 fun AppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-//    startDestination: String = AppDestinations.HOME_ROUTE,
     startDestination: String = AppDestinations.LOGIN_ROUTE,
     navActions: AppNavigationActions = remember(navController) {
         AppNavigationActions(navController)

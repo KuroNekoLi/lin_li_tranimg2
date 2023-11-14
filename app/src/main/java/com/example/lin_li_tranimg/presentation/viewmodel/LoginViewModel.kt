@@ -103,8 +103,9 @@ class LoginViewModel(
             }
         }
     }
-
-
+    /**
+     * 管理使用者的登入事件
+     */
     fun onEvent(event: LoginEvent) {
         when (event) {
             is LoginEvent.AccountTextEntered -> {
