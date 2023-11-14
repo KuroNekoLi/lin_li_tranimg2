@@ -1,5 +1,6 @@
 package com.example.lin_li_tranimg.presentation.compose
 
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,11 +26,14 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -38,6 +42,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.view.WindowCompat
 import com.example.lin_li_tranimg.R
 import com.example.lin_li_tranimg.presentation.LoginDialogType
 import com.example.lin_li_tranimg.presentation.LoginEvent
@@ -45,6 +50,7 @@ import com.example.lin_li_tranimg.presentation.viewmodel.LoginViewModel
 import com.example.lin_li_tranimg.ui.theme.ButtonStyles
 import com.example.lin_li_tranimg.ui.theme.ButtonTypography
 import com.example.lin_li_tranimg.ui.theme.DialogBackgroundColor
+import com.example.lin_li_tranimg.ui.theme.LoginStatusBarColor
 import com.example.lin_li_tranimg.ui.theme.Yellow
 import com.example.lin_li_tranimg.util.EmailVisualTransformation
 import org.koin.androidx.compose.getViewModel
@@ -69,66 +75,66 @@ fun LoginScreen(
 ) {
     val viewModel: LoginViewModel = getViewModel()
     val loginScreenState = viewModel.loginScreenState.value
-
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.bg),
-            contentDescription = stringResource(R.string.bg_login_content),
-            contentScale = ContentScale.Crop,
-            modifier = modifier.matchParentSize()
-        )
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = modifier
-                .fillMaxWidth()
-                .align(Alignment.Center)
-                .padding(top = 150.dp)
+    LoginScreenTheme {
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            AccountField(
-                account = loginScreenState.accountText,
-                onAccountChange = { viewModel.onEvent(LoginEvent.AccountTextEntered(it)) },
-                onIconEyeClick = { viewModel.onEvent(LoginEvent.IconEyeClicked) },
-                isAccountVisible = loginScreenState.isEyeOpened
+            Image(
+                painter = painterResource(id = R.drawable.bg),
+                contentDescription = stringResource(R.string.bg_login_content),
+                contentScale = ContentScale.Crop,
+                modifier = modifier.matchParentSize()
             )
-            PasswordField(
-                password = loginScreenState.passwordText,
-                onPasswordChange = { viewModel.onEvent(LoginEvent.PasswordTextEntered(it)) }
-            )
-            AboveLoginButtonRow(
-                onForgetPassword = onForgetPassword,
-                onRegister = onRegister,
-                onGuest = onGuest,
-                isSwitchBarChecked = loginScreenState.isRememberSwitchBarOn,
-                onSwitchBarChecked = { viewModel.onEvent(LoginEvent.RememberBarSwitched) }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center)
+                    .padding(top = 150.dp)
+            ) {
+                AccountField(
+                    account = loginScreenState.accountText,
+                    onAccountChange = { viewModel.onEvent(LoginEvent.AccountTextEntered(it)) },
+                    onIconEyeClick = { viewModel.onEvent(LoginEvent.IconEyeClicked) },
+                    isAccountVisible = loginScreenState.isEyeOpened
+                )
+                PasswordField(
+                    password = loginScreenState.passwordText,
+                    onPasswordChange = { viewModel.onEvent(LoginEvent.PasswordTextEntered(it)) }
+                )
+                AboveLoginButtonRow(
+                    onForgetPassword = onForgetPassword,
+                    onRegister = onRegister,
+                    onGuest = onGuest,
+                    isSwitchBarChecked = loginScreenState.isRememberSwitchBarOn,
+                    onSwitchBarChecked = { viewModel.onEvent(LoginEvent.RememberBarSwitched) }
 
-            )
-            LoginButton(
-                loginScreenState.isLoginButtonEnabled,
-                onClick = { viewModel.onEvent(LoginEvent.LoginButtonClicked) })
-            // 根據登入成功與否顯示登入狀態的對話框
-            when (loginScreenState.loginDialogType) {
-                LoginDialogType.Loading -> LoginLoadingDialog {}
-                LoginDialogType.Success -> {
-                    LoginSuccessDialog {}
-                    viewModel.resetDialogTypeToNone()
-                    onLogin()
+                )
+                LoginButton(
+                    loginScreenState.isLoginButtonEnabled,
+                    onClick = { viewModel.onEvent(LoginEvent.LoginButtonClicked) })
+                // 根據登入成功與否顯示登入狀態的對話框
+                when (loginScreenState.loginDialogType) {
+                    LoginDialogType.Loading -> LoginLoadingDialog {}
+                    LoginDialogType.Success -> {
+                        LoginSuccessDialog {}
+                        viewModel.resetDialogTypeToNone()
+                        onLogin()
+                    }
+
+                    is LoginDialogType.Error -> {
+                        LoginFailedDialog(
+                            errorMessage = loginScreenState.loginDialogType.message,
+                            onDismiss = { viewModel.resetDialogTypeToNone() }
+                        )
+                    }
+
+                    LoginDialogType.None -> {}
                 }
-
-                is LoginDialogType.Error -> {
-                    LoginFailedDialog(
-                        errorMessage = loginScreenState.loginDialogType.message,
-                        onDismiss = { viewModel.resetDialogTypeToNone() }
-                    )
-                }
-
-                LoginDialogType.None -> {}
             }
         }
     }
-
 }
 
 @Composable
@@ -395,5 +401,22 @@ private fun LoginTextBody(string: String) {
         color = Color.White,
         fontSize = MaterialTheme.typography.bodyMedium.fontSize,
         text = string
+    )
+}
+@Composable
+fun LoginScreenTheme(content: @Composable () -> Unit) {
+    val currentView = LocalView.current
+
+    MaterialTheme(
+        typography = MaterialTheme.typography,
+        shapes = MaterialTheme.shapes,
+        content = {
+            SideEffect {
+                val window = (currentView.context as Activity).window
+                window.statusBarColor = LoginStatusBarColor.toArgb()
+                WindowCompat.getInsetsController(window, currentView).isAppearanceLightStatusBars = false
+            }
+            content()
+        }
     )
 }
