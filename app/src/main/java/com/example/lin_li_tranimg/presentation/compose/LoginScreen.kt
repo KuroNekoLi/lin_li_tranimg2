@@ -46,6 +46,7 @@ import com.example.lin_li_tranimg.R
 import com.example.lin_li_tranimg.presentation.LoginEvent
 import com.example.lin_li_tranimg.presentation.viewmodel.LoginViewModel
 import com.example.lin_li_tranimg.ui.theme.ButtonStyles
+import com.example.lin_li_tranimg.ui.theme.ButtonTypography
 import com.example.lin_li_tranimg.ui.theme.DialogBackgroundColor
 import com.example.lin_li_tranimg.ui.theme.Yellow
 import com.example.lin_li_tranimg.util.EmailVisualTransformation
@@ -256,7 +257,10 @@ private fun LoginButton(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Text("登入")
+        Text(
+            text = stringResource(R.string.login),
+            fontSize = ButtonTypography.fontSize
+        )
     }
 }
 
