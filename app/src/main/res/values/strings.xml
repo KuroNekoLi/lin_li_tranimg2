@@ -18,4 +18,5 @@
     <string name="loading">登入中…請您稍候</string>
     <string name="login_successful">登入成功</string>
     <string name="login_failed">登入失敗</string>
+    <string name="back">返回</string>
 </resources>
