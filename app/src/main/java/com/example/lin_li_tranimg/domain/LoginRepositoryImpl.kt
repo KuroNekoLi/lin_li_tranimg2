@@ -1,6 +1,6 @@
 package com.example.lin_li_tranimg.domain
 
-import PreferencesManager
+import com.example.lin_li_tranimg.util.PreferencesManager
 import com.cmoney.backend2.identityprovider.service.IdentityProviderWeb
 import com.cmoney.backend2.identityprovider.service.api.gettoken.GetTokenResponseBody
 import kotlinx.coroutines.flow.Flow

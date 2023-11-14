@@ -5,7 +5,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-// 在这个文件中，我们定义按钮的样式
+/**
+ * 登入按鈕的樣式
+ */
 object ButtonStyles {
     @Composable
     fun defaultButtonColors() = ButtonDefaults.buttonColors(

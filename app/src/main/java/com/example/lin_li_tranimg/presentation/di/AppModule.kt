@@ -1,6 +1,6 @@
 package com.example.lin_li_tranimg.presentation.di
 
-import PreferencesManager
+import com.example.lin_li_tranimg.util.PreferencesManager
 import com.cmoney.backend2.base.model.manager.GlobalBackend2Manager
 import com.example.lin_li_tranimg.BuildConfig
 import com.example.lin_li_tranimg.domain.LoginRepository

@@ -11,6 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.example.lin_li_tranimg.R
 
+/**
+ * 自訂的頂端導覽列
+ * @param title 導覽標題
+ * @param onNavigationClick 按下返回按鈕的事件
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommonTopAppBar(
