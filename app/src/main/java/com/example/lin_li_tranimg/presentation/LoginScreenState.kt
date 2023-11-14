@@ -5,8 +5,6 @@ data class LoginScreenState(
     val passwordText: String = "",
     val isEyeOpened: Boolean = true,
     val isRememberSwitchBarOn: Boolean = false,
-    val isError: String?,
+    val loginDialogType: LoginDialogType,
     val isLoginButtonEnabled: Boolean = false,
-    val isSuccess: Boolean?,
-    val isLoading: Boolean?
 )

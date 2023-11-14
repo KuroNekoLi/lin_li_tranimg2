@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cmoney.backend2.base.model.exception.ServerException
 import com.example.lin_li_tranimg.domain.LoginRepository
+import com.example.lin_li_tranimg.presentation.LoginDialogType
 import com.example.lin_li_tranimg.presentation.LoginEvent
 import com.example.lin_li_tranimg.presentation.LoginScreenState
 import kotlinx.coroutines.Dispatchers
@@ -26,9 +27,7 @@ class LoginViewModel(
             isEyeOpened = true,
             isRememberSwitchBarOn = false,
             isLoginButtonEnabled = false,
-            isError = null,
-            isSuccess = null,
-            isLoading = null
+            loginDialogType = LoginDialogType.None
         )
     )
 
@@ -69,30 +68,36 @@ class LoginViewModel(
         return password.text.length >= 4
     }
 
-    fun login() {
+    private fun login() {
         val account = _loginScreenState.value.accountText
         val password = _loginScreenState.value.passwordText
         viewModelScope.launch {
             _loginScreenState.value = loginScreenState.value.copy(
-                isLoading = true
+                loginDialogType = LoginDialogType.Loading
             )
-            val result = loginRepository.loginByEmail(account, password)
+            val loginByEmailResult = loginRepository.loginByEmail(account, password)
+            val loginByCellPhoneResult = loginRepository.loginCellphone(account, password)
 
-            if (result.isSuccess) {
+            if (loginByEmailResult.isSuccess || loginByCellPhoneResult.isSuccess) {
                 _loginScreenState.value = loginScreenState.value.copy(
-                    isLoading = null,
-                    isSuccess = true
+                    loginDialogType = LoginDialogType.Success
                 )
-            }
+            }else{
+                if (loginByEmailResult.isFailure) {
+                    val errorMessage =
+                        (loginByEmailResult.exceptionOrNull() as? ServerException)?.message ?: "登入失敗"
+                    _loginScreenState.value = loginScreenState.value.copy(
+                        loginDialogType = LoginDialogType.Error(errorMessage)
+                    )
+                }
 
-            if (result.isFailure) {
-                val errorMessage =
-                    (result.exceptionOrNull() as? ServerException)?.message ?: "登入失敗"
-                _loginScreenState.value = loginScreenState.value.copy(
-                    isLoading = null,
-                    isSuccess = null,
-                    isError = errorMessage
-                )
+                if (loginByCellPhoneResult.isFailure) {
+                    val errorMessage =
+                        (loginByCellPhoneResult.exceptionOrNull() as? ServerException)?.message ?: "登入失敗"
+                    _loginScreenState.value = loginScreenState.value.copy(
+                        loginDialogType = LoginDialogType.Error(errorMessage)
+                    )
+                }
             }
         }
     }
@@ -176,6 +181,15 @@ class LoginViewModel(
                 }
             }
         }
+    }
+
+    /**
+     * 將對話框的狀態設為無對話框
+     */
+    fun resetDialogTypeToNone() {
+        _loginScreenState.value = _loginScreenState.value.copy(
+            loginDialogType = LoginDialogType.None
+        )
     }
 }
 

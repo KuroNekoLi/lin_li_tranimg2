@@ -25,11 +25,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.lin_li_tranimg.R
+import com.example.lin_li_tranimg.presentation.LoginDialogType
 import com.example.lin_li_tranimg.presentation.LoginEvent
 import com.example.lin_li_tranimg.presentation.viewmodel.LoginViewModel
 import com.example.lin_li_tranimg.ui.theme.ButtonStyles
@@ -72,21 +69,6 @@ fun LoginScreen(
 ) {
     val viewModel: LoginViewModel = getViewModel()
     val loginScreenState = viewModel.loginScreenState.value
-    var currentDialogType by remember { mutableStateOf(DialogType.None) }
-
-
-    LaunchedEffect(
-        loginScreenState.isLoading,
-        loginScreenState.isSuccess,
-        loginScreenState.isError
-    ) {
-        currentDialogType = when {
-            loginScreenState.isLoading == true -> DialogType.Loading
-            loginScreenState.isSuccess == true -> DialogType.Success
-            loginScreenState.isError != null -> DialogType.Failed
-            else -> DialogType.None
-        }
-    }
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -127,22 +109,25 @@ fun LoginScreen(
                 loginScreenState.isLoginButtonEnabled,
                 onClick = { viewModel.onEvent(LoginEvent.LoginButtonClicked) })
             // 顯示登入狀態的對話框
-            when (currentDialogType) {
-                DialogType.Loading -> LoginLoadingDialog {}
-                DialogType.Success -> {
+            when (loginScreenState.loginDialogType) {
+                LoginDialogType.Loading -> LoginLoadingDialog {}
+                LoginDialogType.Success -> {
                     LoginSuccessDialog {}
+                    viewModel.resetDialogTypeToNone()
                     onLogin()
                 }
-                DialogType.Failed -> LoginFailedDialog(errorMessage = loginScreenState.isError!!) {
-                    currentDialogType = DialogType.None
+                is LoginDialogType.Error -> {
+                    LoginFailedDialog(
+                        errorMessage = loginScreenState.loginDialogType.message,
+                        onDismiss = { viewModel.resetDialogTypeToNone() }
+                    )
                 }
-                DialogType.None -> {}
+                LoginDialogType.None -> {}
             }
         }
     }
 
 }
-
 @Composable
 private fun AutoLoginSwitch(
     checked: Boolean,
@@ -408,8 +393,4 @@ private fun LoginTextBody(string: String) {
         fontSize = MaterialTheme.typography.bodyMedium.fontSize,
         text = string
     )
-}
-
-enum class DialogType {
-    None, Loading, Success, Failed
 }

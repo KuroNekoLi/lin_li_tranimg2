@@ -55,6 +55,23 @@ class LoginRepositoryImpl(
         return identityProviderWeb.loginByEmail(account, md5edPassword)
     }
 
+    override suspend fun loginCellphone(
+        account: String,
+        password: String
+    ): Result<GetTokenResponseBody> {
+        val md5edPassword = try {
+            password.md5().orEmpty()
+        } catch (e: Exception) {
+            return Result.failure(e)
+        }
+
+        if (account.isEmpty() || md5edPassword.isEmpty()) {
+            return Result.failure(IllegalArgumentException("帳號或密碼不可為空"))
+        }
+
+        return identityProviderWeb.loginByCellphone(account, md5edPassword)
+    }
+
     @Throws(NoSuchAlgorithmException::class)
     private fun String.md5(): String? {
         val md5: MessageDigest = MessageDigest.getInstance("MD5")

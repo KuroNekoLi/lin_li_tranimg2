@@ -47,4 +47,12 @@ interface LoginRepository {
      * @return 登錄操作的結果。
      */
     suspend fun loginByEmail(account: String, password: String): Result<GetTokenResponseBody>
+    /**
+     * 使用手機和密碼進行登錄操作。
+     *
+     * @param account 用戶的手機號碼。
+     * @param password 用戶的密碼。
+     * @return 登錄操作的結果。
+     */
+    suspend fun loginCellphone(account: String, password: String): Result<GetTokenResponseBody>
 }
