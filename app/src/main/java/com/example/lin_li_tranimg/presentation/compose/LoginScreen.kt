@@ -76,7 +76,7 @@ fun LoginScreen(
     ) {
         Image(
             painter = painterResource(id = R.drawable.bg),
-            contentDescription = "背景圖片",
+            contentDescription = stringResource(R.string.bg_login_content),
             contentScale = ContentScale.Crop,
             modifier = modifier.matchParentSize()
         )
@@ -108,7 +108,7 @@ fun LoginScreen(
             LoginButton(
                 loginScreenState.isLoginButtonEnabled,
                 onClick = { viewModel.onEvent(LoginEvent.LoginButtonClicked) })
-            // 顯示登入狀態的對話框
+            // 根據登入成功與否顯示登入狀態的對話框
             when (loginScreenState.loginDialogType) {
                 LoginDialogType.Loading -> LoginLoadingDialog {}
                 LoginDialogType.Success -> {
@@ -163,7 +163,7 @@ private fun AccountField(
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.icon_login_person),
-                contentDescription = "帳號圖示",
+                contentDescription = stringResource(R.string.icon_account_content),
                 modifier.size(24.dp)
             )
         },
@@ -173,7 +173,7 @@ private fun AccountField(
                     painter = painterResource(
                         id = if (isAccountVisible) R.drawable.icon_open_eye else R.drawable.icon_close_eye
                     ),
-                    contentDescription = if (isAccountVisible) "隱藏帳號" else "顯示帳號",
+                    contentDescription = if (isAccountVisible) stringResource(R.string.icon_eye_opened_content) else stringResource(R.string.icon_eye_closeed_content),
                     modifier.size(24.dp)
                 )
             }
@@ -210,7 +210,7 @@ private fun PasswordField(
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.icon_password),
-                contentDescription = "帳號圖示",
+                contentDescription = stringResource(R.string.icon_password_content),
                 modifier.size(24.dp)
             )
         },
@@ -243,7 +243,7 @@ private fun LoginButton(
             .padding(16.dp)
     ) {
         Text(
-            text = stringResource(R.string.login),
+            text = stringResource(R.string.login_by_guest),
             fontSize = ButtonTypography.fontSize
         )
     }
@@ -269,7 +269,7 @@ private fun AboveLoginButtonRow(
             modifier = modifier.clickable {
                 onForgetPassword()
             },
-            text = "忘記密碼",
+            text = stringResource(R.string.forget_password),
             color = Color.White,
         )
         Spacer(modifier = modifier.width(10.dp))
@@ -277,7 +277,7 @@ private fun AboveLoginButtonRow(
             modifier = modifier.clickable {
                 onRegister()
             },
-            text = "註冊",
+            text = stringResource(R.string.register),
             color = Color.White
         )
         Spacer(modifier = modifier.width(10.dp))
@@ -285,12 +285,12 @@ private fun AboveLoginButtonRow(
             modifier = modifier.clickable {
                 onGuest()
             },
-            text = "訪客登入",
+            text = stringResource(R.string.login_by_guest),
             color = Color.White
         )
         Spacer(modifier.weight(1f))
         Text(
-            text = "記住密碼",
+            text = stringResource(R.string.remember_password),
             color = Color.White
         )
         AutoLoginSwitch(
@@ -318,7 +318,7 @@ private fun LoginLoadingDialog(
                     .width(64.dp),
                 color = Yellow
             )
-            LoginTextBody(string = "登入中，請您稍候...")
+            LoginTextBody(stringResource(R.string.loading))
         }
     }
 }
@@ -336,10 +336,10 @@ private fun LoginSuccessDialog(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            LoginTextHeader(string = "登入成功")
+            LoginTextHeader(stringResource(R.string.login_successful))
             Icon(
                 painter = painterResource(id = R.drawable.icon_login_success),
-                contentDescription = "登入成功",
+                contentDescription = stringResource(R.string.login_successful),
                 modifier.size(64.dp),
                 tint = Yellow
             )
@@ -368,10 +368,10 @@ private fun LoginFailedDialog(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            LoginTextHeader(string = "登入失敗")
+            LoginTextHeader(stringResource(R.string.login_failed))
             Icon(
                 painter = painterResource(id = R.drawable.icon_login_fail),
-                contentDescription = "登入失敗",
+                contentDescription = stringResource(R.string.login_failed),
                 modifier.size(64.dp),
                 tint = Yellow
             )

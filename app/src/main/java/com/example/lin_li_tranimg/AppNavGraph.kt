@@ -3,6 +3,7 @@ package com.example.lin_li_tranimg
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -37,25 +38,25 @@ fun AppNavHost(
         }
         composable(AppDestinations.REGISTER_ROUTE) {
             RegisterScreen(
-                title = "註冊畫面",
+                title = stringResource(R.string.title_register),
                 onBackClick = popBackStack
             )
         }
         composable(AppDestinations.GUEST_ROUTE) {
             GuestScreen(
-                title = "訪客畫面",
+                title = stringResource(R.string.title_guest),
                 onBackClick = popBackStack
             )
         }
         composable(AppDestinations.FORGET_PASSWORD_ROUTE) {
             ForgetPasswordScreen(
-                title = "忘記密碼畫面",
+                title = stringResource(R.string.title_forget_password),
                 onBackClick = popBackStack
             )
         }
         composable(AppDestinations.STOCK_ROUTE) {
             ForgetPasswordScreen(
-                title = "主畫面",
+                title = stringResource(R.string.title_main),
                 onBackClick = popBackStack
             )
         }

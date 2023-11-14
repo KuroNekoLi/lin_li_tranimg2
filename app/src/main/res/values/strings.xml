@@ -2,5 +2,20 @@
     <string name="app_name">lin_li_tranimg</string>
     <string name="account_label">\"CMoney帳號 (手機號碼或email)\"</string>
     <string name="password_label">\"密碼\"</string>
-    <string name="login">登入</string>
+    <string name="login_by_guest">登入</string>
+    <string name="title_register">註冊畫面</string>
+    <string name="title_guest">訪客畫面</string>
+    <string name="title_forget_password">忘記密碼畫面</string>
+    <string name="title_main">主畫面</string>
+    <string name="bg_login_content">背景圖片</string>
+    <string name="icon_account_content">帳號圖示</string>
+    <string name="icon_eye_opened_content">顯示帳號</string>
+    <string name="icon_eye_closeed_content">隱藏帳號</string>
+    <string name="icon_password_content">帳號圖示</string>
+    <string name="forget_password">忘記密碼</string>
+    <string name="register">註冊</string>
+    <string name="remember_password">記住密碼</string>
+    <string name="loading">登入中…請您稍候</string>
+    <string name="login_successful">登入成功</string>
+    <string name="login_failed">登入失敗</string>
 </resources>
